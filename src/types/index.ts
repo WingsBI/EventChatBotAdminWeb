@@ -100,3 +100,49 @@ export interface CoverageTopic {
   coverage: number;
   accuracy: number;
 }
+
+export interface AdoptionFunnelStage {
+  stage: string;
+  count: number;
+}
+
+export interface AdoptionSegment {
+  segment: string;
+  eligible: number;
+  users: number;
+  adoption: number;
+  avgConv: number;
+  repeat: number;
+}
+
+export interface StandTypeAdoption {
+  type: string;
+  users: number;
+}
+
+export interface UserRetention {
+  type: string;
+  count: number;
+}
+
+export interface FeedbackSentiment {
+  type: string;
+  count: number;
+}
+
+export interface Escalation {
+  reason: string;
+  count: number;
+}
+
+export interface IntentOutcome {
+  intent: string;
+  conversations: number;
+  success: number;
+  unsuccessful: number;
+}
+
+export interface OpsImpact {
+  dept: string;
+  impact: number;
+}
