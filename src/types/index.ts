@@ -84,6 +84,17 @@ export interface RecentConversation {
   satisfied: boolean | null;
 }
 
+export interface OverviewStats {
+  totalConversations: number;
+  totalConversationsGrowth: number;
+  activeEvents: number;
+  activeEventsGrowth: number;
+  responseAccuracy: number;
+  responseAccuracyGrowth: number;
+  avgResponseTime: number;
+  avgResponseTimeGrowth: number;
+}
+
 export interface CoverageTopic {
   topic: string;
   coverage: number;

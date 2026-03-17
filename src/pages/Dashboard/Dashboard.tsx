@@ -18,27 +18,26 @@ import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import {
-  kpiData, conversationStats, topQueries, languageStats, recentConversations,
-  adoptionFunnel, adoptionSegments, standTypeAdoption, userRetention, sessionMetrics,
-  intentOutcome, feedbackSentiment, escalations,
-  knowledgeSources, coverageTopics, opsImpact, actionLog, unansweredGaps,
+  recentConversations, sessionMetrics,
+  knowledgeSources, actionLog, unansweredGaps,
 } from '../../services/mockData';
+import {
+  useGetOverviewStatsQuery,
+  useGetConversationStatsQuery,
+  useGetLanguageStatsQuery,
+  useGetTopQueriesQuery,
+  useLazyGetAdoptionFunnelQuery,
+  useLazyGetAdoptionSegmentsQuery,
+  useLazyGetStandTypeAdoptionQuery,
+  useLazyGetUserRetentionQuery,
+  useLazyGetFeedbackSentimentQuery,
+  useLazyGetEscalationsQuery,
+  useLazyGetIntentOutcomeQuery,
+  useLazyGetCoverageTopicsQuery,
+  useLazyGetOpsImpactQuery,
+} from '../../store/dashboardApiSlice';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899', '#8b5cf6'];
-
-// Log all chart data
-console.log('📊 conversationStats:', JSON.stringify(conversationStats, null, 2));
-console.log('📊 languageStats:', JSON.stringify(languageStats, null, 2));
-console.log('📊 topQueries:', JSON.stringify(topQueries, null, 2));
-console.log('📊 adoptionFunnel:', JSON.stringify(adoptionFunnel, null, 2));
-console.log('📊 adoptionSegments:', JSON.stringify(adoptionSegments, null, 2));
-console.log('📊 standTypeAdoption:', JSON.stringify(standTypeAdoption, null, 2));
-console.log('📊 userRetention:', JSON.stringify(userRetention, null, 2));
-console.log('📊 intentOutcome:', JSON.stringify(intentOutcome, null, 2));
-console.log('📊 feedbackSentiment:', JSON.stringify(feedbackSentiment, null, 2));
-console.log('📊 escalations:', JSON.stringify(escalations, null, 2));
-console.log('📊 opsImpact:', JSON.stringify(opsImpact, null, 2));
-console.log('📊 coverageTopics:', JSON.stringify(coverageTopics, null, 2));
 
 const kpiIcons: Record<string, React.ReactNode> = {
   chat: <ChatOutlinedIcon />,
@@ -52,21 +51,111 @@ export default function Dashboard() {
   const isDarkMode = theme.palette.mode === 'dark';
   const tickColor = isDarkMode ? '#ffffff' : '#64748b';
   const gridColor = isDarkMode ? alpha('#fff', 0.1) : '#e2e8f0';
-
   const cursorColor = isDarkMode ? alpha('#fff', 0.05) : alpha('#000', 0.05);
 
   const [tab, setTab] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
 
+  // Tab 0 — KPI cards (auto-fetch on page load)
+  const { data: overviewStats, isFetching: overviewFetching, refetch: refetchOverview } = useGetOverviewStatsQuery();
+
+  const kpiCards = overviewStats
+    ? [
+        { label: 'Total Conversations', value: overviewStats.totalConversations.toLocaleString(), change: overviewStats.totalConversationsGrowth, changeLabel: 'vs last month', icon: 'chat' },
+        { label: 'Active Events',        value: overviewStats.activeEvents,                        change: overviewStats.activeEventsGrowth,        changeLabel: 'new this month', icon: 'event' },
+        { label: 'Response Accuracy',    value: `${overviewStats.responseAccuracy}%`,              change: overviewStats.responseAccuracyGrowth,    changeLabel: 'vs last month', icon: 'accuracy' },
+        { label: 'Avg Response Time',    value: `${overviewStats.avgResponseTime}s`,               change: overviewStats.avgResponseTimeGrowth,     changeLabel: 'vs last month', icon: 'speed' },
+      ]
+    : [];
+
+  // Tab 0 — auto-fetch on page load
+  const { data: conversationStats = [], isFetching: convFetching, refetch: refetchConv }       = useGetConversationStatsQuery();
+  const { data: languageStats = [],     isFetching: langFetching, refetch: refetchLang }       = useGetLanguageStatsQuery();
+  const { data: topQueries = [],        isFetching: queriesFetching, refetch: refetchQueries } = useGetTopQueriesQuery();
+
+  // Tabs 1, 3, 4, 5 — lazy, triggered on tab switch
+  const [triggerFunnel,      { data: adoptionFunnel = [],     isFetching: funnelFetching    }] = useLazyGetAdoptionFunnelQuery();
+  const [triggerSegments,    { data: adoptionSegments = [],   isFetching: segsFetching      }] = useLazyGetAdoptionSegmentsQuery();
+  const [triggerStandType,   { data: standTypeAdoption = [],  isFetching: standFetching     }] = useLazyGetStandTypeAdoptionQuery();
+  const [triggerRetention,   { data: userRetention = [],      isFetching: retentionFetching }] = useLazyGetUserRetentionQuery();
+  const [triggerSentiment,   { data: feedbackSentiment = [],  isFetching: sentimentFetching }] = useLazyGetFeedbackSentimentQuery();
+  const [triggerEscalations, { data: escalations = [],        isFetching: escalFetching     }] = useLazyGetEscalationsQuery();
+  const [triggerIntent,      { data: intentOutcome = [],      isFetching: intentFetching    }] = useLazyGetIntentOutcomeQuery();
+  const [triggerCoverage,    { data: coverageTopics = [],     isFetching: coverageFetching  }] = useLazyGetCoverageTopicsQuery();
+  const [triggerOpsImpact,   { data: opsImpact = [],          isFetching: opsFetching       }] = useLazyGetOpsImpactQuery();
+
+  // Derive loading indicator for the visible tab
+  const tabLoading =
+    tab === 0 ? overviewFetching || convFetching || langFetching || queriesFetching :
+    tab === 1 ? funnelFetching || segsFetching || standFetching || retentionFetching :
+    tab === 3 ? sentimentFetching || escalFetching || intentFetching :
+    tab === 4 ? coverageFetching :
+    tab === 5 ? opsFetching :
+    false;
+
+  const handleTabChange = useCallback((_e: React.SyntheticEvent, newTab: number) => {
+    setTab(newTab);
+    // true = use cache if available, skip re-fetch on revisit
+    switch (newTab) {
+      case 1:
+        triggerFunnel(undefined, true);
+        triggerSegments(undefined, true);
+        triggerStandType(undefined, true);
+        triggerRetention(undefined, true);
+        break;
+      case 3:
+        triggerSentiment(undefined, true);
+        triggerEscalations(undefined, true);
+        triggerIntent(undefined, true);
+        break;
+      case 4:
+        triggerCoverage(undefined, true);
+        break;
+      case 5:
+        triggerOpsImpact(undefined, true);
+        break;
+    }
+  }, [
+    triggerFunnel, triggerSegments, triggerStandType, triggerRetention,
+    triggerSentiment, triggerEscalations, triggerIntent,
+    triggerCoverage, triggerOpsImpact,
+  ]);
+
   const handleRefresh = useCallback(() => {
-    setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-      setSnackbar({ open: true, message: 'Dashboard data refreshed!', severity: 'success' });
-    }, 1500);
-  }, []);
+    // false = force refetch, bypass cache
+    switch (tab) {
+      case 0:
+        refetchOverview();
+        refetchConv();
+        refetchLang();
+        refetchQueries();
+        break;
+      case 1:
+        triggerFunnel(undefined, false);
+        triggerSegments(undefined, false);
+        triggerStandType(undefined, false);
+        triggerRetention(undefined, false);
+        break;
+      case 3:
+        triggerSentiment(undefined, false);
+        triggerEscalations(undefined, false);
+        triggerIntent(undefined, false);
+        break;
+      case 4:
+        triggerCoverage(undefined, false);
+        break;
+      case 5:
+        triggerOpsImpact(undefined, false);
+        break;
+    }
+    setSnackbar({ open: true, message: 'Dashboard data refreshed!', severity: 'success' });
+  }, [
+    tab, refetchOverview, refetchConv, refetchLang, refetchQueries,
+    triggerFunnel, triggerSegments, triggerStandType, triggerRetention,
+    triggerSentiment, triggerEscalations, triggerIntent,
+    triggerCoverage, triggerOpsImpact,
+  ]);
 
   const handleExport = useCallback(() => {
     setExporting(true);
@@ -74,7 +163,7 @@ export default function Dashboard() {
     setTimeout(() => {
       try {
         // 1. Prepare Data for Excel
-        const kpiSheetData = kpiData.map(item => ({
+        const kpiSheetData = kpiCards.map(item => ({
           'Metric': item.label,
           'Value': item.value,
           'Change %': item.change,
@@ -122,7 +211,7 @@ export default function Dashboard() {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, position: 'relative' }}>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1, position: 'absolute', borderRadius: 3 }}
-        open={refreshing || exporting}
+        open={exporting || tabLoading}
       >
         <CircularProgress color="inherit" size={32} />
         {exporting && (
@@ -213,7 +302,7 @@ export default function Dashboard() {
 
       {/* Tabs Menu */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 1 }}>
-        <Tabs value={tab} onChange={(_e, v) => setTab(v)} variant="scrollable" scrollButtons="auto"
+        <Tabs value={tab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto"
           sx={{ '& .MuiTab-root': { textTransform: 'none', fontWeight: 600, fontSize: '0.9rem', color: 'text.secondary', minWidth: 120 }, '& .Mui-selected': { color: '#6366f1' }, '& .MuiTabs-indicator': { backgroundColor: '#6366f1', height: 3, borderRadius: '3px 3px 0 0' } }}
         >
           <Tab label="Overview" />
@@ -230,7 +319,7 @@ export default function Dashboard() {
         <>
           {/* KPI Cards */}
           <Grid container spacing={3}>
-            {kpiData.map((kpi, i) => (
+            {kpiCards.map((kpi, i) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i} sx={{ display: 'flex' }}>
                 <Card sx={{ 
                   borderRadius: 1, 

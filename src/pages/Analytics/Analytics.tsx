@@ -1,23 +1,35 @@
 import {
-  Box, Card, CardContent, Typography, Grid, alpha, Button,
+  Box, Card, CardContent, Typography, Grid, alpha, Button, CircularProgress,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TextField, MenuItem, Select, FormControl, InputLabel, useTheme
 } from '@mui/material';
 import {
   LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid,
 } from 'recharts';
-import { analyticsConversationStats, exhibitorStats, analyticsLanguageStats } from '../../services/mockData';
+import {
+  useGetAnalyticsConversationStatsQuery,
+  useGetAnalyticsLanguageStatsQuery,
+  useGetAnalyticsExhibitorStatsQuery,
+} from '../../store/analyticsApiSlice';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899'];
-
-// Log all chart data
-console.log('📊 analyticsConversationStats:', JSON.stringify(analyticsConversationStats, null, 2));
-console.log('📊 analyticsLanguageStats:', JSON.stringify(analyticsLanguageStats, null, 2));
-console.log('📊 exhibitorStats:', JSON.stringify(exhibitorStats, null, 2));
 
 export default function Analytics() {
   const theme = useTheme();
   const tickColor = theme.palette.mode === 'dark' ? '#ffffff' : '#64748b';
+
+  // Auto-fetch on page load; refetch() re-fetches when Apply Filters is clicked
+  const { data: conversationStats = [], isFetching: convFetching, refetch: refetchConv }   = useGetAnalyticsConversationStatsQuery();
+  const { data: languageStats = [],     isFetching: langFetching, refetch: refetchLang }   = useGetAnalyticsLanguageStatsQuery();
+  const { data: exhibitorStats = [],    isFetching: exhibFetching, refetch: refetchExhib } = useGetAnalyticsExhibitorStatsQuery();
+
+  const loading = convFetching || langFetching || exhibFetching;
+
+  const handleApplyFilters = () => {
+    refetchConv();
+    refetchLang();
+    refetchExhib();
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
@@ -33,7 +45,16 @@ export default function Analytics() {
             <MenuItem value="evt-004">Tech Connect Asia</MenuItem>
           </Select>
         </FormControl>
-        <Button variant="contained" size="small" sx={{ borderRadius: 1.5, px: 2.5 }}>Apply Filters</Button>
+        <Button
+          variant="contained"
+          size="small"
+          onClick={handleApplyFilters}
+          disabled={loading}
+          startIcon={loading ? <CircularProgress size={14} color="inherit" /> : undefined}
+          sx={{ borderRadius: 1.5, px: 2.5 }}
+        >
+          {loading ? 'Loading...' : 'Apply Filters'}
+        </Button>
       </Box>
 
       {/* KPI Row */}
@@ -64,7 +85,7 @@ export default function Analytics() {
             <CardContent sx={{ p: 1.5 }}>
               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 700, fontSize: '0.85rem' }}>Conversation Trends</Typography>
               <ResponsiveContainer width="100%" height={240}>
-                <LineChart data={analyticsConversationStats}>
+                <LineChart data={conversationStats}>
                   <CartesianGrid strokeDasharray="3 3" stroke={alpha(tickColor, 0.15)} vertical={false} />
                   <XAxis dataKey="date" tick={{ fontSize: 10, fill: tickColor }} tickFormatter={(v) => new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })} />
                   <YAxis tick={{ fontSize: 10, fill: tickColor }} />
@@ -89,7 +110,7 @@ export default function Analytics() {
           <Card sx={{ borderRadius: 1 }}>
             <CardContent sx={{ p: 1.5 }}>
               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 700, fontSize: '0.85rem' }}>Language Breakdown</Typography>
-              {analyticsLanguageStats.map((lang, i) => (
+              {languageStats.map((lang, i) => (
                 <Box key={lang.code} sx={{ mb: 1.25 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
                     <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{lang.language}</Typography>
