@@ -2,6 +2,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Accept API URL as a build argument (for CI/CD build environments)
+ARG VITE_API_BASE_URL
+# Pass it to Vite build (defaults to a placeholder if not provided)
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL:-VITE_API_BASE_URL_PLACEHOLDER}
+
 # Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
@@ -28,4 +33,6 @@ RUN printf "server {\n\
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+# This startup command dynamically replaces the placeholder with the runtime environment variable.
+# It allows Azure App Service to set VITE_API_BASE_URL via App Settings without rebuilding the image.
+CMD ["/bin/sh", "-c", "find /usr/share/nginx/html -type f -name '*.js' -exec sed -i \"s|VITE_API_BASE_URL_PLACEHOLDER|${VITE_API_BASE_URL}|g\" {} + && nginx -g 'daemon off;'"]
