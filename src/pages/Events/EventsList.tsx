@@ -104,7 +104,7 @@ export default function EventsList() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                       <ChatOutlinedIcon sx={{ fontSize: 16, color: 'primary.main' }} />
                       <Typography variant="body2" sx={{ fontSize: '0.8rem', fontWeight: 700, color: 'text.primary' }}>
-                        {event.totalConversations.toLocaleString()}
+                        {event.totalConversations?.toLocaleString()}
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
@@ -154,7 +154,7 @@ export default function EventsList() {
                       <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary' }}>{event.venue}</Typography>
                     </td>
                     <td style={{ padding: '16px 24px' }}>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>{event.totalConversations.toLocaleString()}</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>{event.totalConversations?.toLocaleString()}</Typography>
                     </td>
                     <td style={{ padding: '16px 24px' }}>
                       <Chip

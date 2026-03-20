@@ -94,7 +94,7 @@ export default function EventDetail() {
                   </Grid>
                   <Grid size={{ xs: 6 }}>
                     <Typography variant="body2" color="text.secondary">Total Conversations</Typography>
-                    <Typography fontWeight={600} color="text.primary">{event.totalConversations.toLocaleString()}</Typography>
+                    <Typography fontWeight={600} color="text.primary">{event.totalConversations?.toLocaleString()}</Typography>
                   </Grid>
                   <Grid size={{ xs: 6 }}>
                     <Typography variant="body2" color="text.secondary">Total Exhibitors</Typography>
