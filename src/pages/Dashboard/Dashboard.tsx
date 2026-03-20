@@ -231,7 +231,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, position: 'relative' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, position: 'relative' }}>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1, position: 'absolute', borderRadius: 3 }}
         open={exporting || tabLoading}
@@ -242,7 +242,7 @@ export default function Dashboard() {
         )}
       </Backdrop>
       {/* Dashboard Top Navigation & Controls */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 2, borderBottom: 1, borderColor: 'divider' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 1.5, borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={tab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto"
           sx={{ mb: '-1px', '& .MuiTab-root': { textTransform: 'none', fontWeight: 600, fontSize: '0.85rem', color: 'text.secondary', minWidth: 'auto', px: 2 }, '& .Mui-selected': { color: '#6366f1' }, '& .MuiTabs-indicator': { backgroundColor: '#6366f1', height: 3, borderRadius: '3px 3px 0 0' } }}
         >
@@ -319,7 +319,7 @@ export default function Dashboard() {
       {tab === 0 && (
         <>
           {/* KPI Cards */}
-          <Grid container spacing={3}>
+          <Grid container spacing={1.5}>
             {kpiCards.map((kpi, i) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i} sx={{ display: 'flex' }}>
                 <Card sx={{
@@ -328,10 +328,10 @@ export default function Dashboard() {
                   width: '100%',
                   boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
                 }}>
-                  <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                  <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
                       <Box sx={{
-                        width: 40, height: 40, borderRadius: 1.5,
+                        width: 32, height: 32, borderRadius: 1,
                         background: `linear-gradient(135deg, ${alpha(COLORS[i], 0.15)} 0%, ${alpha(COLORS[i], 0.05)} 100%)`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         color: COLORS[i],
@@ -359,7 +359,7 @@ export default function Dashboard() {
             ))}
           </Grid>
 
-          <Grid container spacing={3}>
+          <Grid container spacing={1.5}>
             {/* Top Queries */}
             <Grid size={{ xs: 12, md: 7 }}>
               <Box sx={{ width: '100%', height: '100%' }}>
@@ -383,19 +383,20 @@ export default function Dashboard() {
             <Grid size={{ xs: 12, md: 5 }}>
               <Box sx={{ width: '100%', height: '100%' }}>
                 <ChartWrapper title="Language Usage" subtitle="Conversations by language" data={languageStats}>
+                  {(isFull) => (
                   <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <Box sx={{ flexGrow: 1, minHeight: 200, position: 'relative' }}>
+                    <Box sx={{ flexGrow: 1, minHeight: 180, position: 'relative' }}>
                       <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
                         <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
                           <PieChart>
                             <Pie
                               data={languageStats.map((d:any) => ({...d, percentage: Number(d.percentage || 0)}))}
                               cx="50%" cy="50%"
-                              innerRadius={60} outerRadius={80}
-                              paddingAngle={2} dataKey="percentage"
+                              innerRadius={isFull ? 150 : "50%"} outerRadius={isFull ? 250 : "75%"}
+                              paddingAngle={1} dataKey="percentage"
                               nameKey="language"
                               stroke="none"
-                              label={({ payload }) => `${payload.language}: ${payload.percentage}%`}
+                              label={({ payload }) => payload.percentage > 4 ? `${payload.language}: ${payload.percentage}%` : ''}
                             >
                               {languageStats.map((_, i) => (
                                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -408,12 +409,13 @@ export default function Dashboard() {
                                 backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary
                               }}
                             />
-                            <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.9rem', fontWeight: 500, paddingTop: '10px' }} />
+                            <Legend verticalAlign="bottom" height={48} iconType="circle" wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500, paddingTop: '2px' }} />
                           </PieChart>
                         </ResponsiveContainer>
                       </Box>
                     </Box>
                   </Box>
+                  )}
                 </ChartWrapper>
               </Box>
             </Grid>
@@ -423,8 +425,8 @@ export default function Dashboard() {
 
       {/* Tab: Adoption */}
       {tab === 1 && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <Grid container spacing={2}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Grid container spacing={1.5}>
             {/* Adoption Funnel */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Box sx={{ width: '100%', height: '100%' }}>
@@ -467,22 +469,21 @@ export default function Dashboard() {
             </Grid>
           </Grid>
 
-          <Grid container spacing={2}>
+          <Grid container spacing={1.5}>
             {/* New vs Repeat */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Box sx={{ width: '100%', height: '100%' }}>
                 <ChartWrapper title="New vs Repeat Users" subtitle="How many exhibitors came back for multiple sessions" data={userRetention}>
+                  {(isFull) => (
                   <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <Box sx={{ flexGrow: 1, minHeight: 220, position: 'relative' }}>
+                    <Box sx={{ flexGrow: 1, minHeight: 180, position: 'relative' }}>
                       <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
                         <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
                           <PieChart>
-                            <Pie
-                              data={userRetention.map((d:any)=>({...d, count: Number(d.count || 0)}))}
+                            <Pie nameKey="type" data={userRetention.map((d:any)=>({...d, count: Number(d.count || 0)}))}
                               cx="50%" cy="50%"
-                              innerRadius={60}
-                              outerRadius={80}
-                              paddingAngle={2}
+                              innerRadius={isFull ? 150 : "50%"} outerRadius={isFull ? 250 : "75%"}
+                              paddingAngle={1}
                               dataKey="count"
                               stroke="none"
                               label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
@@ -494,12 +495,13 @@ export default function Dashboard() {
                               }
                             </Pie>
                             <Tooltip formatter={(value: any) => value} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                            <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.9rem', fontWeight: 500, paddingTop: '10px' }} />
+                            <Legend verticalAlign="bottom" height={48} iconType="circle" wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500, paddingTop: '2px' }} />
                           </PieChart>
                         </ResponsiveContainer>
                       </Box>
                     </Box>
                   </Box>
+                  )}
                 </ChartWrapper>
               </Box>
             </Grid>
@@ -526,8 +528,8 @@ export default function Dashboard() {
 
       {/* Tab: Conversations */}
       {tab === 2 && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <Grid container spacing={3}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Grid container spacing={1.5}>
             {/* Conversation Trend */}
             <Grid size={{ xs: 12, md: 12 }} sx={{ display: 'flex' }}>
               <Box sx={{ width: '100%', height: '100%' }}>
@@ -543,7 +545,7 @@ export default function Dashboard() {
                           backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary
                         }}
                       />
-                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.9rem', fontWeight: 500, paddingTop: '10px' }} />
+                      <Legend verticalAlign="bottom" height={48} iconType="circle" wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500, paddingTop: '2px' }} />
                       <Line type="monotone" name="Conversations" dataKey="conversations" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1', strokeWidth: 0 }} activeDot={{ r: 6 }} />
                       <Line type="monotone" name="Unique Users" dataKey="uniqueUsers" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981', strokeWidth: 0 }} />
                     </LineChart>
@@ -612,38 +614,38 @@ export default function Dashboard() {
 
       {/* Tab: Response Quality */}
       {tab === 3 && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-          <Grid container spacing={2}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Grid container spacing={1.5}>
             {/* Sentiment */}
             <Grid size={{ xs: 12, md: 4 }}>
               <Box sx={{ width: '100%', height: '100%' }}>
                 <ChartWrapper title="User Sentiment" subtitle="Post-conversation feedback" data={feedbackSentiment}>
+                  {(isFull) => (
                   <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <Box sx={{ flexGrow: 1, minHeight: 220, position: 'relative' }}>
+                    <Box sx={{ flexGrow: 1, minHeight: 180, position: 'relative' }}>
                       <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
                         <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
                           <PieChart>
-                            <Pie
-                              data={feedbackSentiment.map((d:any)=>({...d, count: Number(d.count || 0)}))}
+                            <Pie nameKey="sentiment" data={feedbackSentiment.map((d:any)=>({...d, count: Number(d.count || 0)}))}
                               cx="50%" cy="50%"
-                              innerRadius={60}
-                              outerRadius={80}
-                              paddingAngle={2}
+                              innerRadius={isFull ? 150 : "50%"} outerRadius={isFull ? 250 : "75%"}
+                              paddingAngle={1}
                               dataKey="count"
                               stroke="none"
-                              label={({ name, value }) => `${name}: ${value}`}
+                              label={({ name, percent }) => (percent || 0) > 0.04 ? `${name}` : ''}
                             >
                               {['#22c55e', '#fbbf24', '#ef4444'].map((color, index) => (
                                 <Cell key={`cell-${index}`} fill={color} />
                               ))}
                             </Pie>
                             <Tooltip formatter={(value: any) => value} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                            <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.9rem', fontWeight: 500, paddingTop: '10px' }} />
+                            <Legend verticalAlign="bottom" height={48} iconType="circle" wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500, paddingTop: '2px' }} />
                           </PieChart>
                         </ResponsiveContainer>
                       </Box>
                     </Box>
                   </Box>
+                  )}
                 </ChartWrapper>
               </Box>
             </Grid>
@@ -667,7 +669,7 @@ export default function Dashboard() {
           </Grid>
 
           {/* Intent Outcomes */}
-          <Grid container spacing={2}>
+          <Grid container spacing={1.5}>
             {/* Intent Outcomes */}
             <Grid size={{ xs: 12, md: 12 }}>
               <Box sx={{ width: '100%', height: '100%' }}>
@@ -713,8 +715,8 @@ export default function Dashboard() {
 
       {/* Tab: Knowledge Base */}
       {tab === 4 && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-          <Grid container spacing={2}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Grid container spacing={1.5}>
             {/* Coverage Topics */}
             <Grid size={{ xs: 12, md: 5 }}>
               <Box sx={{ width: '100%', height: '100%' }}>
@@ -736,7 +738,7 @@ export default function Dashboard() {
                           backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary, fontSize: '0.75rem'
                         }}
                       />
-                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.9rem', fontWeight: 500, paddingTop: '10px' }} />
+                      <Legend verticalAlign="bottom" height={48} iconType="circle" wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500, paddingTop: '2px' }} />
                       <Bar dataKey="coverage" name="Knowledge Coverage %" fill="#6366f1" radius={[0, 2, 2, 0]} barSize={10} />
                       <Bar dataKey="accuracy" name="Response Accuracy %" fill="#10b981" radius={[0, 2, 2, 0]} barSize={10} />
                     </BarChart>
@@ -750,33 +752,34 @@ export default function Dashboard() {
 
       {/* Tab: Operational Insights */}
       {tab === 5 && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-          <Grid container spacing={2}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Grid container spacing={1.5}>
             {/* Dept Impact */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Box sx={{ width: '100%', height: '100%' }}>
                 <ChartWrapper title="Workload Impact by Department" subtitle="Estimated support hours saved by team" data={opsImpact}>
+                  {(isFull) => (
                   <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={opsImpact.map((d:any)=>({...d, impact: Number(d.impact || 0)}))}
                         cx="50%" cy="50%"
-                        innerRadius={60}
-                        outerRadius={90}
-                        paddingAngle={2}
+                        innerRadius={isFull ? 150 : "50%"} outerRadius={isFull ? 250 : "75%"}
+                        paddingAngle={1}
                         dataKey="impact"
                         nameKey="dept"
                         stroke="none"
-                        label={({ payload }) => `${payload.dept}: ${payload.impact}%`}
+                        label={({ payload }) => payload.impact > 4 ? `${payload.dept}: ${payload.impact}%` : ''}
                       >
                         {['#22d3ee', '#6366f1', '#fbbf24', '#f97316', '#ec4899', '#8b5cf6'].map((color, index) => (
                           <Cell key={`cell-${index}`} fill={color} />
                         ))}
                       </Pie>
                       <Tooltip formatter={(value: any) => `${value}%`} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.9rem', fontWeight: 500, paddingTop: '10px' }} />
+                      <Legend verticalAlign="bottom" height={48} iconType="circle" wrapperStyle={{ fontSize: '0.75rem', fontWeight: 500, paddingTop: '2px' }} />
                     </PieChart>
                   </ResponsiveContainer>
+                  )}
                 </ChartWrapper>
               </Box>
             </Grid>

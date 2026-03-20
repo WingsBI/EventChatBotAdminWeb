@@ -40,11 +40,11 @@ export default function Analytics() {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
       {/* Filters */}
       <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', mb: 0.5 }}>
-        <TextField label="Start Date" type="date" size="small" defaultValue="2026-03-01" InputLabelProps={{ shrink: true }} sx={{ '& .MuiInputBase-root': { borderRadius: 1.5 } }} />
-        <TextField label="End Date" type="date" size="small" defaultValue="2026-03-11" InputLabelProps={{ shrink: true }} sx={{ '& .MuiInputBase-root': { borderRadius: 1.5 } }} />
-        <FormControl size="small" sx={{ minWidth: 180 }}>
-          <InputLabel>Event</InputLabel>
-          <Select label="Event" defaultValue="all" sx={{ borderRadius: 1.5 }}>
+        <TextField label="Start Date" type="date" size="small" defaultValue="2026-03-01" InputLabelProps={{ shrink: true, sx: { fontSize: '0.8rem' } }} sx={{ '& .MuiInputBase-root': { borderRadius: 1.5, height: 32, fontSize: '0.8rem' } }} />
+        <TextField label="End Date" type="date" size="small" defaultValue="2026-03-11" InputLabelProps={{ shrink: true, sx: { fontSize: '0.8rem' } }} sx={{ '& .MuiInputBase-root': { borderRadius: 1.5, height: 32, fontSize: '0.8rem' } }} />
+        <FormControl size="small" sx={{ minWidth: 160 }}>
+          <InputLabel sx={{ fontSize: '0.8rem', transform: 'translate(14px, 8px) scale(1)', '&.MuiInputLabel-shrink': { transform: 'translate(14px, -6px) scale(0.75)' } }}>Event</InputLabel>
+          <Select label="Event" defaultValue="all" sx={{ borderRadius: 1.5, height: 32, fontSize: '0.8rem', '& .MuiSelect-select': { py: 0.5 } }}>
             <MenuItem value="all">All Events</MenuItem>
             <MenuItem value="evt-001">Gastech 2026</MenuItem>
             <MenuItem value="evt-004">Tech Connect Asia</MenuItem>
@@ -56,7 +56,7 @@ export default function Analytics() {
           onClick={handleApplyFilters}
           disabled={loading}
           startIcon={loading ? <CircularProgress size={14} color="inherit" /> : undefined}
-          sx={{ borderRadius: 1.5, px: 2.5 }}
+          sx={{ borderRadius: 1.5, px: 2, height: 32, fontSize: '0.75rem', textTransform: 'none' }}
         >
           {loading ? 'Loading...' : 'Apply Filters'}
         </Button>
@@ -84,9 +84,9 @@ export default function Analytics() {
       </Grid>
 
       {/* Charts */}
-      <Grid container spacing={2}>
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Card sx={{ borderRadius: 1 }}>
+      <Grid container spacing={2} sx={{ alignItems: 'stretch' }}>
+        <Grid size={{ xs: 12, md: 8 }} sx={{ display: 'flex' }}>
+          <Card sx={{ borderRadius: 1, width: '100%', height: '100%' }}>
             <CardContent sx={{ p: 1.5 }}>
               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 700, fontSize: '0.85rem' }}>Conversation Trends</Typography>
               <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height={240}>
@@ -111,12 +111,13 @@ export default function Analytics() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Card sx={{ borderRadius: 1 }}>
-            <CardContent sx={{ p: 1.5 }}>
+        <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex' }}>
+          <Card sx={{ borderRadius: 1, width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ p: 1.5, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 700, fontSize: '0.85rem' }}>Language Breakdown</Typography>
+              <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly' }}>
               {languageStats.map((lang, i) => (
-                <Box key={lang.code} sx={{ mb: 1.25 }}>
+                <Box key={lang.code}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
                     <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>{lang.language}</Typography>
                     <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.7rem', color: 'text.secondary' }}>{lang.percentage}%</Typography>
@@ -126,6 +127,7 @@ export default function Analytics() {
                   </Box>
                 </Box>
               ))}
+              </Box>
             </CardContent>
           </Card>
         </Grid>

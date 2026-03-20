@@ -1,25 +1,27 @@
-import { useState } from 'react';
+import React, { useState, createContext } from 'react';
 import { Card, Box, Typography, IconButton, Dialog, DialogContent, alpha } from '@mui/material';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+
+export const FullScreenContext = createContext<boolean>(false);
 
 interface ChartWrapperProps {
   title: string | React.ReactNode;
   subtitle?: React.ReactNode;
   data?: any[] | null;
-  children: React.ReactNode;
+  children: React.ReactNode | ((isFull: boolean) => React.ReactNode);
   height?: number | string;
   disableEmptyState?: boolean;
 }
 
-export default function ChartWrapper({ title, subtitle, data, children, height = 280, disableEmptyState = false }: ChartWrapperProps) {
+export default function ChartWrapper({ title, subtitle, data, children, height = "100%", disableEmptyState = false }: ChartWrapperProps) {
   const [isFullScreen, setIsFullScreen] = useState(false);
   
   const isEmpty = !disableEmptyState && (!data || data.length === 0);
 
   const renderContent = (isFull: boolean) => (
-    <Box sx={{ p: isFull ? 3 : 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: isFull ? 4 : 2 }}>
+    <Box sx={{ p: isFull ? 3 : 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: isFull ? 3 : 0.5 }}>
         <Box>
           <Typography variant="h6" sx={{ mb: 0.25, fontWeight: 700, color: 'text.primary', fontSize: isFull ? '1.5rem' : '0.9rem' }}>
             {title}
@@ -34,7 +36,7 @@ export default function ChartWrapper({ title, subtitle, data, children, height =
           {isFull ? <FullscreenExitIcon /> : <FullscreenIcon fontSize="small" />}
         </IconButton>
       </Box>
-      <Box sx={{ flexGrow: 1, position: 'relative', minHeight: isFull ? 0 : height }}>
+      <Box sx={{ flexGrow: 1, position: 'relative', minHeight: isFull ? 0 : { xs: 300, sm: 320, md: 350, lg: 400, xl: 550 } }}>
         {isEmpty ? (
           <Box sx={{ 
             display: 'flex', 
@@ -51,8 +53,9 @@ export default function ChartWrapper({ title, subtitle, data, children, height =
           </Box>
         ) : (
           <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden' }}>
-            {/* If fullscreen, we only want to render children inside the Dialog, otherwise inside the Card */}
-            {(isFull === isFullScreen) ? children : null}
+            <FullScreenContext.Provider value={isFull}>
+              {(isFull === isFullScreen) ? (typeof children === 'function' ? children(isFull) : children) : null}
+            </FullScreenContext.Provider>
           </Box>
         )}
       </Box>
