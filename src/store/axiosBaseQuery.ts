@@ -21,7 +21,13 @@ const axiosBaseQuery: BaseQueryFn<AxiosArgs, unknown, AxiosBaseQueryError> = asy
   params,
 }) => {
   try {
-    const result = await api({ url, method, data, params });
+    const result = await api({ url, method, data, params, responseType: 'json' });
+    
+    // If the server returns HTML (SPA fallback), treat it as an API 404 error
+    if (typeof result.data === 'string' && result.data.trim().startsWith('<')) {
+      throw { response: { status: 404, data: 'API route not found (HTML fallback)' }, message: 'API route not found' };
+    }
+    
     return { data: result.data };
   } catch (err) {
     const error = err as AxiosError;
