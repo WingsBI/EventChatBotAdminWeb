@@ -72,21 +72,45 @@ export default function Dashboard() {
     : [];
 
   // Tab 0 — auto-fetch on page load, re-fetches when period changes
-  const { data: recentConversations = [], isFetching: recentFetching, refetch: refetchRecent } = useGetRecentConversationsQuery({ period });
-  const { data: conversationStats = [], isFetching: convFetching, refetch: refetchConv }       = useGetConversationStatsQuery({ period });
-  const { data: languageStats = [],     isFetching: langFetching, refetch: refetchLang }       = useGetLanguageStatsQuery({ period });
-  const { data: topQueries = [],        isFetching: queriesFetching, refetch: refetchQueries } = useGetTopQueriesQuery({ period });
+  const { data: rawRecent, isFetching: recentFetching, refetch: refetchRecent } = useGetRecentConversationsQuery({ period });
+  const recentConversations = Array.isArray(rawRecent) ? rawRecent : [];
+  
+  const { data: rawConv, isFetching: convFetching, refetch: refetchConv }       = useGetConversationStatsQuery({ period });
+  const conversationStats = Array.isArray(rawConv) ? rawConv : [];
+  
+  const { data: rawLang,     isFetching: langFetching, refetch: refetchLang }       = useGetLanguageStatsQuery({ period });
+  const languageStats = Array.isArray(rawLang) ? rawLang : [];
+  
+  const { data: rawQueries,        isFetching: queriesFetching, refetch: refetchQueries } = useGetTopQueriesQuery({ period });
+  const topQueries = Array.isArray(rawQueries) ? rawQueries : [];
 
   // Tabs 1, 3, 4, 5 — lazy, triggered on tab switch
-  const [triggerFunnel,      { data: adoptionFunnel = [],     isFetching: funnelFetching    }] = useLazyGetAdoptionFunnelQuery();
-  const [triggerSegments,    { data: adoptionSegments = [],   isFetching: segsFetching      }] = useLazyGetAdoptionSegmentsQuery();
-  const [triggerStandType,   { data: standTypeAdoption = [],  isFetching: standFetching     }] = useLazyGetStandTypeAdoptionQuery();
-  const [triggerRetention,   { data: userRetention = [],      isFetching: retentionFetching }] = useLazyGetUserRetentionQuery();
-  const [triggerSentiment,   { data: feedbackSentiment = [],  isFetching: sentimentFetching }] = useLazyGetFeedbackSentimentQuery();
-  const [triggerEscalations, { data: escalations = [],        isFetching: escalFetching     }] = useLazyGetEscalationsQuery();
-  const [triggerIntent,      { data: intentOutcome = [],      isFetching: intentFetching    }] = useLazyGetIntentOutcomeQuery();
-  const [triggerCoverage,    { data: coverageTopics = [],     isFetching: coverageFetching  }] = useLazyGetCoverageTopicsQuery();
-  const [triggerOpsImpact,   { data: opsImpact = [],          isFetching: opsFetching       }] = useLazyGetOpsImpactQuery();
+  const [triggerFunnel,      { data: rawFunnel,     isFetching: funnelFetching    }] = useLazyGetAdoptionFunnelQuery();
+  const adoptionFunnel = Array.isArray(rawFunnel) ? rawFunnel : [];
+  
+  const [triggerSegments,    { data: rawSegments,   isFetching: segsFetching      }] = useLazyGetAdoptionSegmentsQuery();
+  const adoptionSegments = Array.isArray(rawSegments) ? rawSegments : [];
+  
+  const [triggerStandType,   { data: rawStandType,  isFetching: standFetching     }] = useLazyGetStandTypeAdoptionQuery();
+  const standTypeAdoption = Array.isArray(rawStandType) ? rawStandType : [];
+  
+  const [triggerRetention,   { data: rawRetention,      isFetching: retentionFetching }] = useLazyGetUserRetentionQuery();
+  const userRetention = Array.isArray(rawRetention) ? rawRetention : [];
+  
+  const [triggerSentiment,   { data: rawSentiment,  isFetching: sentimentFetching }] = useLazyGetFeedbackSentimentQuery();
+  const feedbackSentiment = Array.isArray(rawSentiment) ? rawSentiment : [];
+  
+  const [triggerEscalations, { data: rawEscalations,        isFetching: escalFetching     }] = useLazyGetEscalationsQuery();
+  const escalations = Array.isArray(rawEscalations) ? rawEscalations : [];
+  
+  const [triggerIntent,      { data: rawIntent,      isFetching: intentFetching    }] = useLazyGetIntentOutcomeQuery();
+  const intentOutcome = Array.isArray(rawIntent) ? rawIntent : [];
+  
+  const [triggerCoverage,    { data: rawCoverage,     isFetching: coverageFetching  }] = useLazyGetCoverageTopicsQuery();
+  const coverageTopics = Array.isArray(rawCoverage) ? rawCoverage : [];
+  
+  const [triggerOpsImpact,   { data: rawOpsImpact,          isFetching: opsFetching       }] = useLazyGetOpsImpactQuery();
+  const opsImpact = Array.isArray(rawOpsImpact) ? rawOpsImpact : [];
 
   // Derive loading indicator for the visible tab
   const tabLoading =

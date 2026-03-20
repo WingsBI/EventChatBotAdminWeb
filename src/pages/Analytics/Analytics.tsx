@@ -19,9 +19,14 @@ export default function Analytics() {
   const tickColor = theme.palette.mode === 'dark' ? '#ffffff' : '#64748b';
 
   // Auto-fetch on page load; refetch() re-fetches when Apply Filters is clicked
-  const { data: conversationStats = [], isFetching: convFetching, refetch: refetchConv }   = useGetAnalyticsConversationStatsQuery();
-  const { data: languageStats = [],     isFetching: langFetching, refetch: refetchLang }   = useGetAnalyticsLanguageStatsQuery();
-  const { data: exhibitorStats = [],    isFetching: exhibFetching, refetch: refetchExhib } = useGetAnalyticsExhibitorStatsQuery();
+  const { data: rawConv, isFetching: convFetching, refetch: refetchConv }   = useGetAnalyticsConversationStatsQuery();
+  const conversationStats = Array.isArray(rawConv) ? rawConv : [];
+
+  const { data: rawLang,     isFetching: langFetching, refetch: refetchLang }   = useGetAnalyticsLanguageStatsQuery();
+  const languageStats = Array.isArray(rawLang) ? rawLang : [];
+
+  const { data: rawExhib,    isFetching: exhibFetching, refetch: refetchExhib } = useGetAnalyticsExhibitorStatsQuery();
+  const exhibitorStats = Array.isArray(rawExhib) ? rawExhib : [];
 
   const loading = convFetching || langFetching || exhibFetching;
 
@@ -84,7 +89,7 @@ export default function Analytics() {
           <Card sx={{ borderRadius: 1 }}>
             <CardContent sx={{ p: 1.5 }}>
               <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 700, fontSize: '0.85rem' }}>Conversation Trends</Typography>
-              <ResponsiveContainer width="100%" height={240}>
+              <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height={240}>
                 <LineChart data={conversationStats}>
                   <CartesianGrid strokeDasharray="3 3" stroke={alpha(tickColor, 0.15)} vertical={false} />
                   <XAxis dataKey="date" tick={{ fontSize: 10, fill: tickColor }} tickFormatter={(v) => new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })} />
