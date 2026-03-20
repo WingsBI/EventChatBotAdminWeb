@@ -9,7 +9,7 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ContentCopyRoundedIcon from '@mui/icons-material/ContentCopyRounded';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import CodeRoundedIcon from '@mui/icons-material/CodeRounded';
-import { events } from '../../services/mockData';
+const events: any[] = [];
 import ChatbotPreview from '../../components/common/ChatbotPreview';
 
 const LANGUAGES = [
@@ -113,7 +113,7 @@ export default function EventDetail() {
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>Languages</Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {event.languages.map((lang) => {
+                  {event.languages.map((lang:any) => {
                     const langObj = LANGUAGES.find((l) => l.code === lang);
                     return <Chip key={lang} label={langObj?.name || lang} sx={{ fontWeight: 600 }} color="primary" variant="outlined" />;
                   })}

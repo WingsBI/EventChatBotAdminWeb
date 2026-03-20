@@ -17,10 +17,7 @@ import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
-import {
-  sessionMetrics,
-  knowledgeSources, actionLog, unansweredGaps,
-} from '../../services/mockData';
+import ChartWrapper from '../../components/common/ChartWrapper';
 import {
   useGetOverviewStatsQuery,
   useGetRecentConversationsQuery,
@@ -62,64 +59,62 @@ export default function Dashboard() {
   // Tab 0 — KPI cards (auto-fetch on page load, re-fetches when period changes)
   const { data: overviewStats, isFetching: overviewFetching, refetch: refetchOverview } = useGetOverviewStatsQuery({ period });
 
-  const kpiCards = overviewStats
-    ? [
-        { label: 'Total Conversations', value: overviewStats.totalConversations?.toLocaleString(), change: overviewStats.totalConversationsGrowth ?? 0, changeLabel: 'vs last month', icon: 'chat' },
-        { label: 'Active Events',        value: overviewStats.activeEvents,                        change: overviewStats.activeEventsGrowth ?? 0,        changeLabel: 'new this month', icon: 'event' },
-        { label: 'Response Accuracy',    value: `${overviewStats.responseAccuracy}%`,              change: overviewStats.responseAccuracyGrowth ?? 0,    changeLabel: 'vs last month', icon: 'accuracy' },
-        { label: 'Avg Response Time',    value: `${overviewStats.avgResponseTime}s`,               change: overviewStats.avgResponseTimeGrowth ?? 0,     changeLabel: 'vs last month', icon: 'speed' },
-      ]
-    : [];
+  const kpiCards = [
+    { label: 'Total Conversations', value: overviewStats?.totalConversations != null ? overviewStats.totalConversations.toLocaleString() : 'No Data', change: overviewStats?.totalConversationsGrowth ?? 0, changeLabel: 'vs last month', icon: 'chat' },
+    { label: 'Active Events', value: overviewStats?.activeEvents != null ? overviewStats.activeEvents : 'No Data', change: overviewStats?.activeEventsGrowth ?? 0, changeLabel: 'new this month', icon: 'event' },
+    { label: 'Response Accuracy', value: overviewStats?.responseAccuracy != null ? `${overviewStats.responseAccuracy}%` : 'No Data', change: overviewStats?.responseAccuracyGrowth ?? 0, changeLabel: 'vs last month', icon: 'accuracy' },
+    { label: 'Avg Response Time', value: overviewStats?.avgResponseTime != null ? `${overviewStats.avgResponseTime}s` : 'No Data', change: overviewStats?.avgResponseTimeGrowth ?? 0, changeLabel: 'vs last month', icon: 'speed' },
+  ];
 
   // Tab 0 — auto-fetch on page load, re-fetches when period changes
   const { data: rawRecent, isFetching: recentFetching, refetch: refetchRecent } = useGetRecentConversationsQuery({ period });
   const recentConversations = Array.isArray(rawRecent) ? rawRecent : [];
-  
-  const { data: rawConv, isFetching: convFetching, refetch: refetchConv }       = useGetConversationStatsQuery({ period });
+
+  const { data: rawConv, isFetching: convFetching, refetch: refetchConv } = useGetConversationStatsQuery({ period });
   const conversationStats = Array.isArray(rawConv) ? rawConv : [];
-  
-  const { data: rawLang,     isFetching: langFetching, refetch: refetchLang }       = useGetLanguageStatsQuery({ period });
+
+  const { data: rawLang, isFetching: langFetching, refetch: refetchLang } = useGetLanguageStatsQuery({ period });
   const languageStats = Array.isArray(rawLang) ? rawLang : [];
-  
-  const { data: rawQueries,        isFetching: queriesFetching, refetch: refetchQueries } = useGetTopQueriesQuery({ period });
+
+  const { data: rawQueries, isFetching: queriesFetching, refetch: refetchQueries } = useGetTopQueriesQuery({ period });
   const topQueries = Array.isArray(rawQueries) ? rawQueries : [];
 
   // Tabs 1, 3, 4, 5 — lazy, triggered on tab switch
-  const [triggerFunnel,      { data: rawFunnel,     isFetching: funnelFetching    }] = useLazyGetAdoptionFunnelQuery();
+  const [triggerFunnel, { data: rawFunnel, isFetching: funnelFetching }] = useLazyGetAdoptionFunnelQuery();
   const adoptionFunnel = Array.isArray(rawFunnel) ? rawFunnel : [];
-  
-  const [triggerSegments,    { data: rawSegments,   isFetching: segsFetching      }] = useLazyGetAdoptionSegmentsQuery();
+
+  const [triggerSegments, { data: rawSegments, isFetching: segsFetching }] = useLazyGetAdoptionSegmentsQuery();
   const adoptionSegments = Array.isArray(rawSegments) ? rawSegments : [];
-  
-  const [triggerStandType,   { data: rawStandType,  isFetching: standFetching     }] = useLazyGetStandTypeAdoptionQuery();
+
+  const [triggerStandType, { data: rawStandType, isFetching: standFetching }] = useLazyGetStandTypeAdoptionQuery();
   const standTypeAdoption = Array.isArray(rawStandType) ? rawStandType : [];
-  
-  const [triggerRetention,   { data: rawRetention,      isFetching: retentionFetching }] = useLazyGetUserRetentionQuery();
+
+  const [triggerRetention, { data: rawRetention, isFetching: retentionFetching }] = useLazyGetUserRetentionQuery();
   const userRetention = Array.isArray(rawRetention) ? rawRetention : [];
-  
-  const [triggerSentiment,   { data: rawSentiment,  isFetching: sentimentFetching }] = useLazyGetFeedbackSentimentQuery();
+
+  const [triggerSentiment, { data: rawSentiment, isFetching: sentimentFetching }] = useLazyGetFeedbackSentimentQuery();
   const feedbackSentiment = Array.isArray(rawSentiment) ? rawSentiment : [];
-  
-  const [triggerEscalations, { data: rawEscalations,        isFetching: escalFetching     }] = useLazyGetEscalationsQuery();
+
+  const [triggerEscalations, { data: rawEscalations, isFetching: escalFetching }] = useLazyGetEscalationsQuery();
   const escalations = Array.isArray(rawEscalations) ? rawEscalations : [];
-  
-  const [triggerIntent,      { data: rawIntent,      isFetching: intentFetching    }] = useLazyGetIntentOutcomeQuery();
+
+  const [triggerIntent, { data: rawIntent, isFetching: intentFetching }] = useLazyGetIntentOutcomeQuery();
   const intentOutcome = Array.isArray(rawIntent) ? rawIntent : [];
-  
-  const [triggerCoverage,    { data: rawCoverage,     isFetching: coverageFetching  }] = useLazyGetCoverageTopicsQuery();
+
+  const [triggerCoverage, { data: rawCoverage, isFetching: coverageFetching }] = useLazyGetCoverageTopicsQuery();
   const coverageTopics = Array.isArray(rawCoverage) ? rawCoverage : [];
-  
-  const [triggerOpsImpact,   { data: rawOpsImpact,          isFetching: opsFetching       }] = useLazyGetOpsImpactQuery();
+
+  const [triggerOpsImpact, { data: rawOpsImpact, isFetching: opsFetching }] = useLazyGetOpsImpactQuery();
   const opsImpact = Array.isArray(rawOpsImpact) ? rawOpsImpact : [];
 
   // Derive loading indicator for the visible tab
   const tabLoading =
     tab === 0 ? overviewFetching || recentFetching || convFetching || langFetching || queriesFetching :
-    tab === 1 ? funnelFetching || segsFetching || standFetching || retentionFetching :
-    tab === 3 ? sentimentFetching || escalFetching || intentFetching :
-    tab === 4 ? coverageFetching :
-    tab === 5 ? opsFetching :
-    false;
+      tab === 1 ? funnelFetching || segsFetching || standFetching || retentionFetching :
+        tab === 3 ? sentimentFetching || escalFetching || intentFetching :
+          tab === 4 ? coverageFetching :
+            tab === 5 ? opsFetching :
+              false;
 
   const handleTabChange = useCallback((_e: React.SyntheticEvent, newTab: number) => {
     setTab(newTab);
@@ -187,7 +182,7 @@ export default function Dashboard() {
 
   const handleExport = useCallback(() => {
     setExporting(true);
-    
+
     setTimeout(() => {
       try {
         // 1. Prepare Data for Excel
@@ -246,13 +241,20 @@ export default function Dashboard() {
           <Typography variant="body2" sx={{ ml: 2, fontWeight: 600 }}>Preparing Export...</Typography>
         )}
       </Backdrop>
-      {/* Topbar Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 0.75 }}>
-        <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', letterSpacing: '-0.02em', fontSize: '1.1rem' }}>
-          AI Chatbot Reporting Dashboard
-        </Typography>
+      {/* Dashboard Top Navigation & Controls */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 2, borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={tab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto"
+          sx={{ mb: '-1px', '& .MuiTab-root': { textTransform: 'none', fontWeight: 600, fontSize: '0.85rem', color: 'text.secondary', minWidth: 'auto', px: 2 }, '& .Mui-selected': { color: '#6366f1' }, '& .MuiTabs-indicator': { backgroundColor: '#6366f1', height: 3, borderRadius: '3px 3px 0 0' } }}
+        >
+          <Tab label="Overview" />
+          <Tab label="Adoption" />
+          <Tab label="Conversations" />
+          <Tab label="Response Quality" />
+          <Tab label="Knowledge Base" />
+          <Tab label="Operational Insights" />
+        </Tabs>
 
-        <Box sx={{ display: 'flex', gap: 0.75, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', pb: 1, ml: 'auto' }}>
           <FormControl size="small">
             <Select
               value={period}
@@ -265,26 +267,10 @@ export default function Dashboard() {
                 '& .MuiSelect-select': { py: 0.75, px: 1.5 }
               }}
             >
-              <MenuItem value="7d"  sx={{ fontSize: '0.75rem' }}>Last 7 Days</MenuItem>
+              <MenuItem value="7d" sx={{ fontSize: '0.75rem' }}>Last 7 Days</MenuItem>
               <MenuItem value="30d" sx={{ fontSize: '0.75rem' }}>Last 30 Days</MenuItem>
               <MenuItem value="90d" sx={{ fontSize: '0.75rem' }}>Last 90 Days</MenuItem>
               <MenuItem value="all" sx={{ fontSize: '0.75rem' }}>Event Cycle</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl size="small">
-            <Select 
-              defaultValue="global" 
-              sx={{ 
-                bgcolor: 'background.paper', 
-                borderRadius: 1, 
-                minWidth: 180, 
-                fontSize: '0.75rem',
-                '& .MuiSelect-select': { py: 0.75, px: 1.5 }
-              }}
-            >
-              <MenuItem value="global" sx={{ fontSize: '0.75rem' }}>Global Food Trade Expo 2026</MenuItem>
-              <MenuItem value="mobility" sx={{ fontSize: '0.75rem' }}>Future Mobility Show 2026</MenuItem>
-              <MenuItem value="energy" sx={{ fontSize: '0.75rem' }}>Energy & Utilities Expo 2026</MenuItem>
             </Select>
           </FormControl>
           <Button
@@ -314,33 +300,19 @@ export default function Dashboard() {
             size="small"
             startIcon={<RefreshOutlinedIcon sx={{ fontSize: '18px !important' }} />}
             onClick={handleRefresh}
-            sx={{ 
-              borderRadius: 1, 
+            sx={{
+              borderRadius: 1,
               px: 2,
               py: 0.75,
-              textTransform: 'none', 
+              textTransform: 'none',
               fontSize: '0.75rem',
-              bgcolor: 'primary.main', 
-              boxShadow: (t) => `0 4px 6px -1px ${alpha(t.palette.primary.main, 0.4)}` 
+              bgcolor: 'primary.main',
+              boxShadow: (t) => `0 4px 6px -1px ${alpha(t.palette.primary.main, 0.4)}`
             }}
           >
             Refresh
           </Button>
         </Box>
-      </Box>
-
-      {/* Tabs Menu */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 1 }}>
-        <Tabs value={tab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto"
-          sx={{ '& .MuiTab-root': { textTransform: 'none', fontWeight: 600, fontSize: '0.9rem', color: 'text.secondary', minWidth: 120 }, '& .Mui-selected': { color: '#6366f1' }, '& .MuiTabs-indicator': { backgroundColor: '#6366f1', height: 3, borderRadius: '3px 3px 0 0' } }}
-        >
-          <Tab label="Overview" />
-          <Tab label="Adoption" />
-          <Tab label="Conversations" />
-          <Tab label="Response Quality" />
-          <Tab label="Knowledge Base" />
-          <Tab label="Operational Insights" />
-        </Tabs>
       </Box>
 
       {/* Tab: Overview */}
@@ -350,11 +322,11 @@ export default function Dashboard() {
           <Grid container spacing={3}>
             {kpiCards.map((kpi, i) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i} sx={{ display: 'flex' }}>
-                <Card sx={{ 
-                  borderRadius: 1, 
-                  height: '100%', 
+                <Card sx={{
+                  borderRadius: 1,
+                  height: '100%',
                   width: '100%',
-                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' 
+                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
                 }}>
                   <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
@@ -387,189 +359,63 @@ export default function Dashboard() {
             ))}
           </Grid>
 
-          {/* Charts Row */}
-          <Grid container spacing={3}>
-            {/* Line Chart */}
-            <Grid size={{ xs: 12, md: 8 }} sx={{ display: 'flex' }}>
-              <Card sx={{ borderRadius: 1, width: '100%', height: '100%', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 0.25, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Conversation Trend</Typography>
-                  <Typography variant="caption" sx={{ mb: 1.5, display: 'block', color: 'text.secondary', fontSize: '0.75rem' }}>Daily chatbot conversations over the selected period</Typography>
-                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height={280}>
-                    <LineChart data={conversationStats}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} tickFormatter={(v) => new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
-                      <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                      <Line type="monotone" dataKey="conversations" name="Conversations" stroke="#6366f1" strokeWidth={2.5} dot={{ r: 3, strokeWidth: 2, fill: theme.palette.background.paper }} activeDot={{ r: 5, strokeWidth: 0 }} />
-                      <Line type="monotone" dataKey="uniqueUsers" name="Unique Users" stroke="#10b981" strokeWidth={2} dot={false} strokeDasharray="5 5" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Pie Chart */}
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Card sx={{ borderRadius: 3, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <Box>
-                    <Typography variant="subtitle1" sx={{ mb: 0.25, fontWeight: 700, color: 'text.primary' }}>Language Usage</Typography>
-                    <Typography variant="caption" sx={{ mb: 1, display: 'block', color: 'text.secondary' }}>Conversations by language</Typography>
-                  </Box>
-                  <Box sx={{ flexGrow: 1, minHeight: 250, display: 'flex', alignItems: 'center' }}>
-                    <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={languageStats}
-                          cx="50%" cy="50%"
-                          innerRadius={65} outerRadius={90}
-                          paddingAngle={3} dataKey="percentage"
-                          nameKey="language"
-                          stroke="none"
-                        >
-                          {languageStats.map((_, i) => (
-                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          formatter={(value: any, name: any) => [`${value}%`, name]} 
-                          contentStyle={{ 
-                            borderRadius: 12, 
-                            border: 'none', 
-                            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
-                            backgroundColor: theme.palette.background.paper,
-                            color: theme.palette.text.primary
-                          }} 
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Box>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1, justifyContent: 'center' }}>
-                    {languageStats.map((lang, i) => (
-                      <Box key={lang.code} sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1, py: 0.5, borderRadius: 1.5, bgcolor: alpha(COLORS[i % COLORS.length], 0.08) }}>
-                        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: COLORS[i % COLORS.length] }} />
-                        <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 600, fontSize: '0.75rem' }}>
-                          {lang.language} {lang.percentage}%
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
-          {/* Bar Chart + Recent Conversations */}
           <Grid container spacing={3}>
             {/* Top Queries */}
-            <Grid size={{ xs: 12, md: 5 }} sx={{ display: 'flex' }}>
-              <Card sx={{ borderRadius: 1, width: '100%', height: '100%', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 0.25, fontWeight: 700, color: 'text.primary' }}>Top Query Categories</Typography>
-                  <Typography variant="caption" sx={{ mb: 1.5, display: 'block', color: 'text.secondary' }}>What exhibitors ask most often</Typography>
-                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height={300}>
-                    <BarChart data={topQueries.slice(0, 6)} layout="vertical" margin={{ left: 10 }}>
+            <Grid size={{ xs: 12, md: 7 }}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="Top Query Categories" subtitle="What exhibitors ask most often" data={topQueries}>
+                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                    <BarChart data={topQueries.slice(0, 6).map((d:any) => ({...d, count: Number(d.count || 0)}))} layout="vertical" margin={{ left: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={true} vertical={false} />
                       <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: tickColor }} />
                       <YAxis dataKey="query" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: tickColor, fontWeight: 500 }} width={160} />
                       <Tooltip cursor={{ fill: cursorColor }} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                      <Bar dataKey="count" name="Queries" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={20} />
+                      <Bar dataKey="count" name="Queries" radius={[0, 4, 4, 0]} barSize={20}>
+                        {topQueries.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                </ChartWrapper>
+              </Box>
             </Grid>
 
-            {/* Recent Conversations */}
-            <Grid size={{ xs: 12, md: 7 }} sx={{ display: 'flex' }}>
-              <Card sx={{ borderRadius: 1, width: '100%', height: '100%', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 0.25, fontWeight: 700, color: 'text.primary' }}>Recent Conversations</Typography>
-                  <Typography variant="caption" sx={{ mb: 1.5, display: 'block', color: 'text.secondary' }}>Latest interactions with the chatbot</Typography>
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow sx={{ '& th': { borderBottom: '1px solid', borderColor: 'divider', color: 'text.secondary', fontWeight: 600, px: 1, py: 1.5 } }}>
-                          <TableCell>User</TableCell>
-                          <TableCell>Query</TableCell>
-                          <TableCell>Language</TableCell>
-                          <TableCell align="center">Rating</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {recentConversations.map((conv) => (
-                          <TableRow key={conv.id} hover sx={{ '& td': { borderBottom: '1px solid', borderColor: alpha('#fff', 0.05), px: 1, py: 1.5 } }}>
-                            <TableCell>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Avatar sx={{ width: 30, height: 30, bgcolor: alpha('#6366f1', 0.1), color: '#6366f1', fontSize: '0.75rem', fontWeight: 600 }}>
-                                  {conv.user.split('#')[1]?.slice(-2) || 'U'}
-                                </Avatar>
-                                <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.primary', fontWeight: 500 }}>{conv.user}</Typography>
-                              </Box>
-                            </TableCell>
-                            <TableCell>
-                              <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {conv.query}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Chip label={conv.language} size="small" sx={{ fontSize: '0.7rem', height: 20, bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#fff', 0.1) : '#f1f5f9', color: 'text.secondary', fontWeight: 500, borderRadius: 1 }} />
-                            </TableCell>
-                            <TableCell align="center">
-                              {conv.satisfied === true && <ThumbUpOutlinedIcon sx={{ fontSize: 16, color: '#10b981' }} />}
-                              {conv.satisfied === false && <ThumbDownOutlinedIcon sx={{ fontSize: 16, color: '#ef4444' }} />}
-                              {conv.satisfied === null && <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'text.disabled' }}>—</Typography>}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
-          {/* Executive Summary Row */}
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 0.25, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Executive Summary</Typography>
-                  <Typography variant="caption" sx={{ mb: 1.5, display: 'block', color: 'text.secondary', fontSize: '0.75rem' }}>Organizer-level interpretation</Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-                    {[
-                      { title: "Strong Adoption", text: "70.6% of eligible exhibitors used the bot, with high engagement from premium tiers." },
-                      { title: "Standard Load Deflection", text: "67.5% deflection shows the bot successfully handles routine forms/deadlines." },
-                    ].map((item, i) => (
-                      <Box key={i} sx={{ borderLeft: '3px solid #6366f1', pl: 1.5, py: 0.25 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', fontSize: '0.75rem' }}>{item.title}</Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', lineHeight: 1.4 }}>{item.text}</Typography>
+            {/* Language Usage */}
+            <Grid size={{ xs: 12, md: 5 }}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="Language Usage" subtitle="Conversations by language" data={languageStats}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <Box sx={{ flexGrow: 1, minHeight: 200, position: 'relative' }}>
+                      <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+                        <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={languageStats.map((d:any) => ({...d, percentage: Number(d.percentage || 0)}))}
+                              cx="50%" cy="50%"
+                              innerRadius={60} outerRadius={80}
+                              paddingAngle={2} dataKey="percentage"
+                              nameKey="language"
+                              stroke="none"
+                              label={({ payload }) => `${payload.language}: ${payload.percentage}%`}
+                            >
+                              {languageStats.map((_, i) => (
+                                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                              ))}
+                            </Pie>
+                            <Tooltip
+                              formatter={(value: any, name: any) => [`${value}%`, name]}
+                              contentStyle={{
+                                borderRadius: 12, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                                backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary
+                              }}
+                            />
+                            <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.9rem', fontWeight: 500, paddingTop: '10px' }} />
+                          </PieChart>
+                        </ResponsiveContainer>
                       </Box>
-                    ))}
+                    </Box>
                   </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 0.25, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Priority Actions</Typography>
-                  <Typography variant="caption" sx={{ mb: 1.5, display: 'block', color: 'text.secondary', fontSize: '0.75rem' }}>Steps for operations team</Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-                    {[
-                      { title: "Exception Handling", text: "Create content for late approvals and sector-specific logistics." },
-                      { title: "Logistics Richness", text: "Enrich move-in/out answers with step-by-step contractor rules." },
-                    ].map((item, i) => (
-                      <Box key={i} sx={{ borderLeft: '3px solid #fbbf24', pl: 1.5, py: 0.25 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', fontSize: '0.75rem' }}>{item.title}</Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem', lineHeight: 1.4 }}>{item.text}</Typography>
-                      </Box>
-                    ))}
-                  </Box>
-                </CardContent>
-              </Card>
+                </ChartWrapper>
+              </Box>
             </Grid>
           </Grid>
         </>
@@ -581,12 +427,10 @@ export default function Dashboard() {
           <Grid container spacing={2}>
             {/* Adoption Funnel */}
             <Grid size={{ xs: 12, md: 6 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Exhibitor Adoption Funnel</Typography>
-                  <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontSize: '0.75rem' }}>From eligible exhibitors to repeat chatbot users</Typography>
-                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height={260}>
-                    <BarChart data={adoptionFunnel} layout="vertical" margin={{ left: 10 }}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="Exhibitor Adoption Funnel" subtitle="From eligible exhibitors to repeat chatbot users" data={adoptionFunnel}>
+                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                    <BarChart data={adoptionFunnel.map((d:any) => ({...d, count: Number(d.count || 0)}))} layout="vertical" margin={{ left: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={gridColor} />
                       <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
                       <YAxis dataKey="stage" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor, fontWeight: 500 }} width={120} />
@@ -601,18 +445,16 @@ export default function Dashboard() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                </ChartWrapper>
+              </Box>
             </Grid>
 
             {/* Adoption by Tier */}
             <Grid size={{ xs: 12, md: 6 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Adoption by Exhibitor Tier</Typography>
-                  <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontSize: '0.75rem' }}>Small, medium, premium and pavilion exhibitors</Typography>
-                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height={260}>
-                    <BarChart data={adoptionSegments} margin={{ left: 0 }}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="Adoption by Exhibitor Tier" subtitle="Small, medium, premium and pavilion exhibitors" data={adoptionSegments}>
+                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                    <BarChart data={adoptionSegments.map((d:any)=>({...d, adoption: Number(d.adoption || 0)}))} margin={{ left: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
                       <XAxis dataKey="segment" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
@@ -620,56 +462,54 @@ export default function Dashboard() {
                       <Bar dataKey="adoption" name="Adoption Rate %" fill="#22c55e" radius={[2, 2, 0, 0]} barSize={30} />
                     </BarChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                </ChartWrapper>
+              </Box>
             </Grid>
           </Grid>
 
           <Grid container spacing={2}>
             {/* New vs Repeat */}
             <Grid size={{ xs: 12, md: 6 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <Box>
-                    <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>New vs Repeat Users</Typography>
-                    <Typography variant="body2" sx={{ mb: 1.5, color: 'text.secondary', fontSize: '0.75rem' }}>How many exhibitors came back for multiple sessions</Typography>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="New vs Repeat Users" subtitle="How many exhibitors came back for multiple sessions" data={userRetention}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <Box sx={{ flexGrow: 1, minHeight: 220, position: 'relative' }}>
+                      <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+                        <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={userRetention.map((d:any)=>({...d, count: Number(d.count || 0)}))}
+                              cx="50%" cy="50%"
+                              innerRadius={60}
+                              outerRadius={80}
+                              paddingAngle={2}
+                              dataKey="count"
+                              stroke="none"
+                              label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                            >
+                              {
+                                ['#6366f1', '#22c55e'].map((color, index) => (
+                                  <Cell key={`cell-${index}`} fill={color} />
+                                ))
+                              }
+                            </Pie>
+                            <Tooltip formatter={(value: any) => value} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                            <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.9rem', fontWeight: 500, paddingTop: '10px' }} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </Box>
+                    </Box>
                   </Box>
-                  <Box sx={{ flexGrow: 1, minHeight: 220 }}>
-                    <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={userRetention}
-                          cx="50%" cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
-                          paddingAngle={2}
-                          dataKey="count"
-                          stroke="none"
-                          label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                        >
-                          {
-                            ['#6366f1', '#22c55e'].map((color, index) => (
-                              <Cell key={`cell-${index}`} fill={color} />
-                            ))
-                          }
-                        </Pie>
-                        <Tooltip formatter={(value: any) => value} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                        <Legend verticalAlign="bottom" height={30} iconType="circle" wrapperStyle={{ fontSize: '0.75rem' }} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </CardContent>
-              </Card>
+                </ChartWrapper>
+              </Box>
             </Grid>
 
             {/* Stand Type Adoption */}
             <Grid size={{ xs: 12, md: 6 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Adoption by Stand Type</Typography>
-                  <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontSize: '0.75rem' }}>Shell scheme, raw space, co-exhibitor, startup zone, etc.</Typography>
-                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height={240}>
-                    <BarChart data={standTypeAdoption} margin={{ left: 0 }}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="Adoption by Stand Type" subtitle="Shell scheme, raw space, co-exhibitor, startup zone, etc." data={standTypeAdoption}>
+                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                    <BarChart data={standTypeAdoption.map((d:any)=>({...d, users: Number(d.users || 0)}))} margin={{ left: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
                       <XAxis dataKey="type" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} angle={-25} textAnchor="end" height={50} />
                       <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
@@ -677,142 +517,94 @@ export default function Dashboard() {
                       <Bar dataKey="users" name="Users" fill="#8b5cf6" radius={[2, 2, 0, 0]} barSize={24} />
                     </BarChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                </ChartWrapper>
+              </Box>
             </Grid>
           </Grid>
-
-          {/* Adoption Table */}
-          <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-            <CardContent sx={{ p: 0 }}>
-              <Box sx={{ p: 2, pb: 1.5 }}>
-                <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Adoption Detail by Exhibitor Group</Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>Sample organizer table view</Typography>
-              </Box>
-              <TableContainer>
-                <Table size="small">
-                  <TableHead sx={{ bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#fff', 0.05) : '#f8fafc' }}>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 700, color: 'text.secondary', py: 1.5, fontSize: '0.7rem' }}>Segment</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: 'text.secondary', py: 1.5, fontSize: '0.7rem' }}>Eligible</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: 'text.secondary', py: 1.5, fontSize: '0.7rem' }}>Users</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: 'text.secondary', py: 1.5, fontSize: '0.7rem' }}>Adoption</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: 'text.secondary', py: 1.5, fontSize: '0.7rem' }}>Avg. Convs / User</TableCell>
-                      <TableCell sx={{ fontWeight: 700, color: 'text.secondary', py: 1.5, fontSize: '0.7rem' }}>Repeat Rate</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {[
-                      { segment: "Small Stands", eligible: 420, users: 262, adoption: 62.4, avgConv: 3.8, repeat: 41.2 },
-                      { segment: "Medium Stands", eligible: 398, users: 292, adoption: 73.4, avgConv: 4.7, repeat: 54.8 },
-                      { segment: "Premium Exhibitors", eligible: 214, users: 176, adoption: 82.2, avgConv: 6.1, repeat: 66.4 },
-                      { segment: "Country Pavilions", eligible: 98, users: 83, adoption: 84.7, avgConv: 5.3, repeat: 61.4 },
-                      { segment: "Co-exhibitors", eligible: 110, users: 63, adoption: 57.3, avgConv: 2.9, repeat: 34.9 }
-                    ].map((row) => (
-                      <TableRow key={row.segment} hover sx={{ '& td': { borderColor: 'divider', py: 1 } }}>
-                        <TableCell sx={{ fontWeight: 700, color: 'text.primary', fontSize: '0.75rem' }}>{row.segment}</TableCell>
-                        <TableCell sx={{ color: 'text.primary', fontSize: '0.75rem' }}>{row.eligible}</TableCell>
-                        <TableCell sx={{ color: 'text.primary', fontSize: '0.75rem' }}>{row.users}</TableCell>
-                        <TableCell>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Box sx={{ width: '100%', maxWidth: 60, height: 5, borderRadius: 2.5, bgcolor: alpha('#22c55e', 0.1) }}>
-                              <Box sx={{ width: `${row.adoption}%`, height: '100%', borderRadius: 2.5, bgcolor: '#22c55e' }} />
-                            </Box>
-                            <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', fontSize: '0.75rem' }}>{row.adoption}%</Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell sx={{ color: 'text.primary', fontSize: '0.75rem' }}>{row.avgConv}</TableCell>
-                        <TableCell sx={{ color: 'text.primary', fontSize: '0.75rem' }}>{row.repeat}%</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
         </Box>
       )}
 
       {/* Tab: Conversations */}
       {tab === 2 && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          {/* Session Metrics */}
-          <Grid container spacing={2}>
-            {sessionMetrics.map((item, i) => (
-              <Grid size={{ xs: 12, sm: 6, md: 2.4 }} key={i}>
-                <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                  <CardContent sx={{ p: 1.5 }}>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 700, mb: 0.5, fontSize: '0.75rem', minHeight: 40 }}>{item.label}</Typography>
-                    <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', fontSize: '1.25rem' }}>{item.value}</Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-
           <Grid container spacing={3}>
-            {/* Conversations by Hour */}
-            <Grid size={{ xs: 12, md: 7 }}>
-              <Card sx={{ borderRadius: 3, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 3 }}>
-                  <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 600, color: 'text.primary' }}>Conversations by Hour</Typography>
-                  <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>When exhibitors interact with the chatbot</Typography>
-                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height={280}>
-                    <BarChart data={[
-                      { time: "00-03", count: 84 }, { time: "03-06", count: 56 }, { time: "06-09", count: 298 },
-                      { time: "09-12", count: 1012 }, { time: "12-15", count: 1144 }, { time: "15-18", count: 980 },
-                      { time: "18-21", count: 468 }, { time: "21-24", count: 244 }
-                    ]} margin={{ left: -10 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
-                      <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: tickColor }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: tickColor }} />
-                      <Tooltip cursor={{ fill: cursorColor }} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                      <Bar dataKey="count" name="Conversations" fill="#fbbf24" radius={[4, 4, 0, 0]} barSize={40} />
-                    </BarChart>
+            {/* Conversation Trend */}
+            <Grid size={{ xs: 12, md: 12 }} sx={{ display: 'flex' }}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="Conversation Trend" subtitle="Daily chatbot conversations over the selected period" data={conversationStats}>
+                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                    <LineChart data={conversationStats.map((d:any) => ({...d, conversations: Number(d.conversations || 0), uniqueUsers: Number(d.uniqueUsers || 0)}))}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+                      <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} tickFormatter={(v) => new Date(v).toLocaleDateString('en', { month: 'short', day: 'numeric' })} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
+                          backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary
+                        }}
+                      />
+                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.9rem', fontWeight: 500, paddingTop: '10px' }} />
+                      <Line type="monotone" name="Conversations" dataKey="conversations" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                      <Line type="monotone" name="Unique Users" dataKey="uniqueUsers" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981', strokeWidth: 0 }} />
+                    </LineChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                </ChartWrapper>
+              </Box>
             </Grid>
 
-            {/* Source Usage */}
-            <Grid size={{ xs: 12, md: 5 }}>
-              <Card sx={{ borderRadius: 3, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <Box>
-                    <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 600, color: 'text.primary' }}>Source Entry Points</Typography>
-                    <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>Where exhibitors start conversations</Typography>
-                  </Box>
-                  <Box sx={{ flexGrow: 1, minHeight: 250 }}>
-                    <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={[
-                            { source: "Dashboard Widget", users: 1462 },
-                            { source: "Order Forms Page", users: 1038 },
-                            { source: "Profile Wizard", users: 676 },
-                            { source: "Deadline Calendar", users: 481 },
-                            { source: "FAQ / Help Center", users: 402 },
-                            { source: "Badging Module", users: 227 }
-                          ]}
-                          cx="50%" cy="50%"
-                          innerRadius={60}
-                          outerRadius={85}
-                          paddingAngle={2}
-                          dataKey="users"
-                          stroke="none"
-                          label={({ payload }) => payload.source}
-                        >
-                          {['#6366f1', '#22c55e', '#fbbf24', '#60a5fa', '#ec4899', '#f97316'].map((color, index) => (
-                            <Cell key={`cell-${index}`} fill={color} />
-                          ))}
-                        </Pie>
-                        <Tooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                        <Legend verticalAlign="bottom" height={36} type="circle" />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </CardContent>
-              </Card>
+            {/* Recent Conversations */}
+            <Grid size={{ xs: 12, md: 12 }} sx={{ display: 'flex' }}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="Recent Conversations" subtitle="Latest interactions with the chatbot" data={recentConversations} disableEmptyState={true}>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow sx={{ '& th': { borderBottom: '1px solid', borderColor: 'divider', color: 'text.secondary', fontWeight: 600, px: 1, py: 1.5 } }}>
+                          <TableCell>User</TableCell>
+                          <TableCell>Query</TableCell>
+                          <TableCell>Language</TableCell>
+                          <TableCell align="center">Rating</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {recentConversations.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={4} align="center" sx={{ py: 6 }}>
+                              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>No Data Found</Typography>
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          recentConversations.map((conv) => (
+                            <TableRow key={conv.id} hover sx={{ '& td': { borderBottom: '1px solid', borderColor: alpha('#fff', 0.05), px: 1, py: 1.5 } }}>
+                              <TableCell>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                  <Avatar sx={{ width: 30, height: 30, bgcolor: alpha('#6366f1', 0.1), color: '#6366f1', fontSize: '0.75rem', fontWeight: 600 }}>
+                                    {conv.user?.split('#')[1]?.slice(-2) || 'U'}
+                                  </Avatar>
+                                  <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.primary', fontWeight: 500 }}>{conv.user}</Typography>
+                                </Box>
+                              </TableCell>
+                              <TableCell>
+                                <Typography variant="body2" sx={{ fontSize: '0.85rem', color: 'text.secondary', maxWidth: 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {conv.query}
+                                </Typography>
+                              </TableCell>
+                              <TableCell>
+                                <Chip label={conv.language} size="small" sx={{ fontSize: '0.7rem', height: 20, bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#fff', 0.1) : '#f1f5f9', color: 'text.secondary', fontWeight: 500, borderRadius: 1 }} />
+                              </TableCell>
+                              <TableCell align="center">
+                                {conv.satisfied === true && <ThumbUpOutlinedIcon sx={{ fontSize: 16, color: '#10b981' }} />}
+                                {conv.satisfied === false && <ThumbDownOutlinedIcon sx={{ fontSize: 16, color: '#ef4444' }} />}
+                                {conv.satisfied === null && <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'text.disabled' }}>—</Typography>}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </ChartWrapper>
+              </Box>
             </Grid>
           </Grid>
         </Box>
@@ -824,46 +616,44 @@ export default function Dashboard() {
           <Grid container spacing={2}>
             {/* Sentiment */}
             <Grid size={{ xs: 12, md: 4 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <Box>
-                    <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>User Sentiment</Typography>
-                    <Typography variant="body2" sx={{ mb: 1.5, color: 'text.secondary', fontSize: '0.75rem' }}>Post-conversation feedback</Typography>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="User Sentiment" subtitle="Post-conversation feedback" data={feedbackSentiment}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <Box sx={{ flexGrow: 1, minHeight: 220, position: 'relative' }}>
+                      <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+                        <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={feedbackSentiment.map((d:any)=>({...d, count: Number(d.count || 0)}))}
+                              cx="50%" cy="50%"
+                              innerRadius={60}
+                              outerRadius={80}
+                              paddingAngle={2}
+                              dataKey="count"
+                              stroke="none"
+                              label={({ name, value }) => `${name}: ${value}`}
+                            >
+                              {['#22c55e', '#fbbf24', '#ef4444'].map((color, index) => (
+                                <Cell key={`cell-${index}`} fill={color} />
+                              ))}
+                            </Pie>
+                            <Tooltip formatter={(value: any) => value} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                            <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.9rem', fontWeight: 500, paddingTop: '10px' }} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </Box>
+                    </Box>
                   </Box>
-                  <Box sx={{ flexGrow: 1, minHeight: 220 }}>
-                    <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={feedbackSentiment}
-                          cx="50%" cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
-                          paddingAngle={2}
-                          dataKey="count"
-                          stroke="none"
-                          label={({ name, value }) => `${name}: ${value}`}
-                        >
-                          {['#22c55e', '#fbbf24', '#ef4444'].map((color, index) => (
-                            <Cell key={`cell-${index}`} fill={color} />
-                          ))}
-                        </Pie>
-                        <Tooltip formatter={(value: any) => value} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                        <Legend verticalAlign="bottom" height={30} iconType="circle" wrapperStyle={{ fontSize: '0.75rem' }} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </CardContent>
-              </Card>
+                </ChartWrapper>
+              </Box>
             </Grid>
 
             {/* Escalations */}
             <Grid size={{ xs: 12, md: 8 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Escalation Drivers</Typography>
-                  <Typography variant="body2" sx={{ mb: 1.5, color: 'text.secondary', fontSize: '0.75rem' }}>Why users asked for a human</Typography>
-                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height={240}>
-                    <BarChart data={escalations} layout="vertical" margin={{ left: 10 }}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="Escalation Drivers" subtitle="Why users asked for a human" data={escalations}>
+                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                    <BarChart data={escalations.map((d:any)=>({...d, count: Number(d.count || 0)}))} layout="vertical" margin={{ left: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={gridColor} />
                       <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
                       <YAxis dataKey="reason" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor, fontWeight: 500 }} width={180} />
@@ -871,21 +661,17 @@ export default function Dashboard() {
                       <Bar dataKey="count" name="Escalations" fill="#ef4444" radius={[0, 2, 2, 0]} barSize={18} />
                     </BarChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                </ChartWrapper>
+              </Box>
             </Grid>
           </Grid>
 
-          {/* Unanswered Gaps & Intent Outcomes */}
+          {/* Intent Outcomes */}
           <Grid container spacing={2}>
             {/* Intent Outcomes */}
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 0 }}>
-                  <Box sx={{ p: 2, pb: 1.5 }}>
-                    <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Intent Outcomes</Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>Resolution rates by topic</Typography>
-                  </Box>
+            <Grid size={{ xs: 12, md: 12 }}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="Intent Outcomes" subtitle="Resolution rates by topic" data={intentOutcome} disableEmptyState={true}>
                   <TableContainer>
                     <Table size="small">
                       <TableHead sx={{ bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#fff', 0.05) : '#f8fafc' }}>
@@ -896,45 +682,30 @@ export default function Dashboard() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {intentOutcome.map(row => (
-                          <TableRow key={row.intent} hover sx={{ '& td': { borderColor: 'divider', py: 1 } }}>
-                            <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>{row.intent}</TableCell>
-                            <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{row.conversations}</TableCell>
-                            <TableCell>
-                              <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.75rem', color: (row.success / row.conversations) > 0.8 ? '#10b981' : '#f59e0b' }}>
-                                {((row.success / row.conversations) * 100).toFixed(1)}%
-                              </Typography>
+                        {intentOutcome.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={3} align="center" sx={{ py: 6 }}>
+                              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>No Data Found</Typography>
                             </TableCell>
                           </TableRow>
-                        ))}
+                        ) : (
+                          intentOutcome.map(row => (
+                            <TableRow key={row.intent} hover sx={{ '& td': { borderColor: 'divider', py: 1 } }}>
+                              <TableCell sx={{ fontWeight: 600, fontSize: '0.75rem' }}>{row.intent}</TableCell>
+                              <TableCell sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{row.conversations}</TableCell>
+                              <TableCell>
+                                <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.75rem', color: (row.success / row.conversations) > 0.8 ? '#10b981' : '#f59e0b' }}>
+                                  {((row.success / row.conversations) * 100).toFixed(1)}%
+                                </Typography>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
                       </TableBody>
                     </Table>
                   </TableContainer>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Unanswered Gaps */}
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 0 }}>
-                  <Box sx={{ p: 2, pb: 1.5 }}>
-                    <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Top Knowledge Gaps</Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>Questions the bot couldn't answer</Typography>
-                  </Box>
-                  <Box sx={{ p: 2, pt: 0, display: 'flex', flexDirection: 'column', gap: 1.25 }}>
-                    {unansweredGaps.slice(0, 3).map((gap, i) => (
-                      <Box key={i} sx={{ p: 1.5, borderRadius: 1.5, bgcolor: (t) => t.palette.mode === 'dark' ? alpha(t.palette.error.main, 0.1) : alpha('#ef4444', 0.05), border: '1px solid', borderColor: 'divider' }}>
-                        <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5, fontSize: '0.75rem' }}>"{gap.q}"</Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 700, fontSize: '0.65rem' }}>Gap: {gap.gap}</Typography>
-                          <Chip label={`${gap.count} times`} size="small" sx={{ height: 18, fontSize: '0.6rem', bgcolor: 'error.main', color: '#fff', fontWeight: 700, borderRadius: 1 }} />
-                        </Box>
-                      </Box>
-                    ))}
-                  </Box>
-                </CardContent>
-              </Card>
+                </ChartWrapper>
+              </Box>
             </Grid>
           </Grid>
         </Box>
@@ -946,106 +717,34 @@ export default function Dashboard() {
           <Grid container spacing={2}>
             {/* Coverage Topics */}
             <Grid size={{ xs: 12, md: 5 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Topic-wise Knowledge Readiness</Typography>
-                  <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary', fontWeight: 500, fontSize: '0.75rem' }}>
-                    Comparing <strong>Knowledge Coverage</strong> vs <strong>Response Accuracy</strong>
-                  </Typography>
-                  <Typography variant="caption" sx={{ mb: 2, display: 'block', color: 'text.disabled', fontStyle: 'italic', fontSize: '0.65rem' }}>
-                    * Higher coverage means more questions answered; higher accuracy means fewer mistakes.
-                  </Typography>
-                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height={300}>
-                    <BarChart data={coverageTopics} layout="vertical" margin={{ left: 10, right: 20, bottom: 10 }}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="Topic-wise Knowledge Readiness" subtitle={
+                  <span style={{ display: 'block' }}>
+                    Comparing <strong>Knowledge Coverage</strong> vs <strong>Response Accuracy</strong><br/>
+                    <em style={{ fontSize: '0.8em', color: 'inherit', opacity: 0.8 }}>* Higher coverage means more questions answered; higher accuracy means fewer mistakes.</em>
+                  </span> as any
+                } data={coverageTopics}>
+                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
+                    <BarChart data={coverageTopics.map((d:any)=>({...d, coverage: Number(d.coverage || 0), accuracy: Number(d.accuracy || 0)}))} layout="vertical" margin={{ left: 10, right: 20, bottom: 10 }}>
                       <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke={gridColor} />
                       <XAxis type="number" domain={[0, 100]} axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor }} />
                       <YAxis dataKey="topic" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: tickColor, fontWeight: 600 }} width={120} />
                       <Tooltip
                         cursor={{ fill: cursorColor }}
                         contentStyle={{
-                          borderRadius: '8px',
-                          border: 'none',
-                          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-                          backgroundColor: theme.palette.background.paper,
-                          color: theme.palette.text.primary,
-                          fontSize: '0.75rem'
+                          borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                          backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary, fontSize: '0.75rem'
                         }}
                       />
-                      <Legend verticalAlign="top" align="right" height={30} iconType="circle" wrapperStyle={{ fontSize: '0.7rem' }} />
+                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.9rem', fontWeight: 500, paddingTop: '10px' }} />
                       <Bar dataKey="coverage" name="Knowledge Coverage %" fill="#6366f1" radius={[0, 2, 2, 0]} barSize={10} />
                       <Bar dataKey="accuracy" name="Response Accuracy %" fill="#10b981" radius={[0, 2, 2, 0]} barSize={10} />
                     </BarChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Knowledge Sources Table */}
-            <Grid size={{ xs: 12, md: 7 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 0 }}>
-                  <Box sx={{ p: 2, pb: 1.5 }}>
-                    <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Knowledge Sources</Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>Documents driving the chatbot's answers</Typography>
-                  </Box>
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead sx={{ bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#fff', 0.05) : '#f8fafc' }}>
-                        <TableRow>
-                          <TableCell sx={{ py: 1, fontWeight: 700, fontSize: '0.7rem' }}>Source Document</TableCell>
-                          <TableCell sx={{ py: 1, fontWeight: 700, fontSize: '0.7rem' }}>Answers</TableCell>
-                          <TableCell sx={{ py: 1, fontWeight: 700, fontSize: '0.7rem' }}>Coverage</TableCell>
-                          <TableCell sx={{ py: 1, fontWeight: 700, fontSize: '0.7rem' }}>Updated</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {knowledgeSources.map((row) => (
-                          <TableRow key={row.source} hover sx={{ '& td': { borderColor: 'divider', py: 1 } }}>
-                            <TableCell>
-                              <Typography variant="body2" sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600, fontSize: '0.75rem' }}>
-                                {row.source}
-                              </Typography>
-                            </TableCell>
-                            <TableCell sx={{ fontSize: '0.75rem' }}>{row.answered}</TableCell>
-                            <TableCell>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Box sx={{ width: '100%', maxWidth: 50, height: 5, borderRadius: 2.5, bgcolor: alpha('#3b82f6', 0.15) }}>
-                                  <Box sx={{ width: `${row.coverage}%`, height: '100%', borderRadius: 2.5, bgcolor: '#3b82f6' }} />
-                                </Box>
-                                <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', fontSize: '0.65rem' }}>{row.coverage}%</Typography>
-                              </Box>
-                            </TableCell>
-                            <TableCell sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>{row.updated}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </CardContent>
-              </Card>
+                </ChartWrapper>
+              </Box>
             </Grid>
           </Grid>
-
-          {/* Action Log */}
-          <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-            <CardContent sx={{ p: 0 }}>
-              <Box sx={{ p: 2, pb: 1.5 }}>
-                <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Knowledge Action Log</Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>Recent team actions to improve the bot</Typography>
-              </Box>
-              <Box sx={{ p: 2, pt: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {actionLog.map((item, i) => (
-                  <Box key={i} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 1.5, borderRadius: 1.5, bgcolor: (t) => t.palette.mode === 'dark' ? alpha('#fff', 0.03) : '#f8fafc', border: '1px solid', borderColor: 'divider' }}>
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', fontSize: '0.75rem' }}>{item.title}</Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.25, display: 'block', fontSize: '0.65rem' }}>{item.meta}</Typography>
-                    </Box>
-                    <Chip label="Actioned" size="small" sx={{ height: 20, fontSize: '0.65rem', bgcolor: alpha('#10b981', 0.1), color: '#10b981', fontWeight: 700, borderRadius: 1 }} />
-                  </Box>
-                ))}
-              </Box>
-            </CardContent>
-          </Card>
         </Box>
       )}
 
@@ -1055,14 +754,12 @@ export default function Dashboard() {
           <Grid container spacing={2}>
             {/* Dept Impact */}
             <Grid size={{ xs: 12, md: 6 }}>
-              <Card sx={{ borderRadius: 1, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', height: '100%' }}>
-                <CardContent sx={{ p: 2 }}>
-                  <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>Workload Impact by Department</Typography>
-                  <Typography variant="body2" sx={{ mb: 1.5, color: 'text.secondary', fontSize: '0.75rem' }}>Estimated support hours saved by team</Typography>
-                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height={260}>
+              <Box sx={{ width: '100%', height: '100%' }}>
+                <ChartWrapper title="Workload Impact by Department" subtitle="Estimated support hours saved by team" data={opsImpact}>
+                  <ResponsiveContainer minWidth={0} minHeight={0} width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={opsImpact}
+                        data={opsImpact.map((d:any)=>({...d, impact: Number(d.impact || 0)}))}
                         cx="50%" cy="50%"
                         innerRadius={60}
                         outerRadius={90}
@@ -1077,11 +774,11 @@ export default function Dashboard() {
                         ))}
                       </Pie>
                       <Tooltip formatter={(value: any) => `${value}%`} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                      <Legend verticalAlign="bottom" height={30} iconType="circle" wrapperStyle={{ fontSize: '0.75rem' }} />
+                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '0.9rem', fontWeight: 500, paddingTop: '10px' }} />
                     </PieChart>
                   </ResponsiveContainer>
-                </CardContent>
-              </Card>
+                </ChartWrapper>
+              </Box>
             </Grid>
           </Grid>
         </Box>
