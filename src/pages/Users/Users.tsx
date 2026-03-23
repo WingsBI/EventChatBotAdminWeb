@@ -8,7 +8,7 @@ import {
 import PersonAddRoundedIcon from '@mui/icons-material/PersonAddRounded';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import BlockRoundedIcon from '@mui/icons-material/BlockRounded';
-import { users } from '../../services/mockData';
+const users: any[] = [];
 
 const roleColors: Record<string, { bg: string; text: string }> = {
   super_admin: { bg: 'rgba(99,102,241,0.1)', text: '#6366f1' },
@@ -48,49 +48,57 @@ export default function Users() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id} hover>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <Avatar sx={{ width: 36, height: 36, bgcolor: alpha('#6366f1', 0.15), color: '#6366f1', fontSize: '0.8rem', fontWeight: 700 }}>
-                        {user.name.split(' ').map((s) => s[0]).join('')}
-                      </Avatar>
-                      <Box>
-                        <Typography sx={{ fontWeight: 600, fontSize: '0.85rem' }}>{user.name}</Typography>
-                        <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>{user.email}</Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Chip label={roleLabels[user.role]} size="small"
-                      sx={{ fontWeight: 700, fontSize: '0.7rem', bgcolor: roleColors[user.role].bg, color: roleColors[user.role].text }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip label={user.status === 'active' ? 'Active' : 'Inactive'} size="small"
-                      sx={{
-                        fontWeight: 600, fontSize: '0.7rem',
-                        bgcolor: user.status === 'active' ? alpha('#10b981', 0.1) : alpha('#ef4444', 0.1),
-                        color: user.status === 'active' ? '#059669' : '#dc2626',
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
-                      {user.assignedEvents.length} event{user.assignedEvents.length !== 1 ? 's' : ''}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
-                      {new Date(user.lastLogin).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' })}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Tooltip title="Edit"><IconButton size="small"><EditRoundedIcon sx={{ fontSize: 18 }} /></IconButton></Tooltip>
-                    <Tooltip title="Deactivate"><IconButton size="small"><BlockRoundedIcon sx={{ fontSize: 18 }} /></IconButton></Tooltip>
+              {users.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>No Data Found</Typography>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                users.map((user) => (
+                  <TableRow key={user.id} hover>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Avatar sx={{ width: 36, height: 36, bgcolor: alpha('#6366f1', 0.15), color: '#6366f1', fontSize: '0.8rem', fontWeight: 700 }}>
+                          {user.name.split(' ').map((s:any) => s[0]).join('')}
+                        </Avatar>
+                        <Box>
+                          <Typography sx={{ fontWeight: 600, fontSize: '0.85rem' }}>{user.name}</Typography>
+                          <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>{user.email}</Typography>
+                        </Box>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Chip label={roleLabels[user.role]} size="small"
+                        sx={{ fontWeight: 700, fontSize: '0.7rem', bgcolor: roleColors[user.role]?.bg || '#eee', color: roleColors[user.role]?.text || '#333' }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip label={user.status === 'active' ? 'Active' : 'Inactive'} size="small"
+                        sx={{
+                          fontWeight: 600, fontSize: '0.7rem',
+                          bgcolor: user.status === 'active' ? alpha('#10b981', 0.1) : alpha('#ef4444', 0.1),
+                          color: user.status === 'active' ? '#059669' : '#dc2626',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                        {user.assignedEvents?.length || 0} event{(user.assignedEvents?.length || 0) !== 1 ? 's' : ''}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                        {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Never'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Tooltip title="Edit"><IconButton size="small"><EditRoundedIcon sx={{ fontSize: 18 }} /></IconButton></Tooltip>
+                      <Tooltip title="Deactivate"><IconButton size="small"><BlockRoundedIcon sx={{ fontSize: 18 }} /></IconButton></Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>

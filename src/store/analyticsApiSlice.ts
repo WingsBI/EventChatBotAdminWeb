@@ -7,13 +7,13 @@ export const analyticsApiSlice = createApi({
   baseQuery: axiosBaseQuery,
   endpoints: (builder) => ({
     getAnalyticsConversationStats: builder.query<ConversationStat[], void>({
-      query: () => ({ url: '/analytics-conversation-stats' }),
+      query: () => ({ url: 'analytics-conversation-stats' }),
     }),
     getAnalyticsLanguageStats: builder.query<LanguageStat[], void>({
-      query: () => ({ url: '/analytics-language-stats' }),
+      query: () => ({ url: 'analytics-language-stats' }),
     }),
     getAnalyticsExhibitorStats: builder.query<ExhibitorStat[], void>({
-      query: () => ({ url: '/analytics-exhibitor-stats' }),
+      query: () => ({ url: 'analytics-exhibitor-stats' }),
     }),
   }),
 });

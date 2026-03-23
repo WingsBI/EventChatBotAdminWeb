@@ -8,7 +8,7 @@ import {
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 import DescriptionRoundedIcon from '@mui/icons-material/DescriptionRounded';
-import { exportRecords } from '../../services/mockData';
+const exportRecords: any[] = [];
 
 const typeLabels: Record<string, string> = {
   conversations: 'Conversation Logs',
@@ -50,45 +50,53 @@ export default function Exports() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {exportRecords.map((exp) => (
-                <TableRow key={exp.id} hover>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <DescriptionRoundedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                      <Typography sx={{ fontWeight: 600, fontSize: '0.85rem' }}>{typeLabels[exp.type]}</Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell><Typography variant="body2">{exp.eventName}</Typography></TableCell>
-                  <TableCell><Typography variant="body2">{exp.dateRange}</Typography></TableCell>
-                  <TableCell>
-                    <Chip label={`${formatIcons[exp.format]} ${exp.format.toUpperCase()}`} size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={exp.status.charAt(0).toUpperCase() + exp.status.slice(1)}
-                      size="small"
-                      sx={{
-                        fontWeight: 600, fontSize: '0.7rem',
-                        bgcolor: exp.status === 'completed' ? alpha('#10b981', 0.1) : exp.status === 'processing' ? alpha('#3b82f6', 0.1) : alpha('#ef4444', 0.1),
-                        color: exp.status === 'completed' ? '#059669' : exp.status === 'processing' ? '#2563eb' : '#dc2626',
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell><Typography variant="body2">{exp.fileSize}</Typography></TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
-                      {new Date(exp.createdAt).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    {exp.status === 'completed' && (
-                      <Tooltip title="Download">
-                        <IconButton size="small" color="primary"><DownloadRoundedIcon sx={{ fontSize: 18 }} /></IconButton>
-                      </Tooltip>
-                    )}
+              {exportRecords.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>No Data Found</Typography>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                exportRecords.map((exp) => (
+                  <TableRow key={exp.id} hover>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <DescriptionRoundedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                        <Typography sx={{ fontWeight: 600, fontSize: '0.85rem' }}>{typeLabels[exp.type]}</Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell><Typography variant="body2">{exp.eventName}</Typography></TableCell>
+                    <TableCell><Typography variant="body2">{exp.dateRange}</Typography></TableCell>
+                    <TableCell>
+                      <Chip label={`${formatIcons[exp.format]} ${exp.format.toUpperCase()}`} size="small" variant="outlined" sx={{ fontWeight: 600, fontSize: '0.7rem' }} />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={exp.status.charAt(0).toUpperCase() + exp.status.slice(1)}
+                        size="small"
+                        sx={{
+                          fontWeight: 600, fontSize: '0.7rem',
+                          bgcolor: exp.status === 'completed' ? alpha('#10b981', 0.1) : exp.status === 'processing' ? alpha('#3b82f6', 0.1) : alpha('#ef4444', 0.1),
+                          color: exp.status === 'completed' ? '#059669' : exp.status === 'processing' ? '#2563eb' : '#dc2626',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell><Typography variant="body2">{exp.fileSize}</Typography></TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                        {new Date(exp.createdAt).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      {exp.status === 'completed' && (
+                        <Tooltip title="Download">
+                          <IconButton size="small" color="primary"><DownloadRoundedIcon sx={{ fontSize: 18 }} /></IconButton>
+                        </Tooltip>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
