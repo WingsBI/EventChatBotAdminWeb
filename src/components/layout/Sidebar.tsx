@@ -83,7 +83,7 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
         {open && (
           <Box sx={{ overflow: 'hidden', flex: 1 }}>
             <Typography sx={{ color: '#fff', fontWeight: 700, fontSize: '0.9rem', lineHeight: 1.2, whiteSpace: 'nowrap' }}>
-              XpoAssist
+              Xpo-Pilot
             </Typography>
             <Typography sx={{ color: alpha('#fff', 0.5), fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
               Admin Portal
