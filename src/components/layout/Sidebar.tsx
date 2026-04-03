@@ -12,6 +12,7 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import { SIDEBAR_BG } from '../../theme/theme';
+import { getAuthUser, getInitials, getFullName, formatRole } from '../../utils/auth';
 
 const DRAWER_WIDTH = 240;
 const COLLAPSED_WIDTH = 72;
@@ -34,6 +35,11 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const user = getAuthUser();
+  const initials = user ? getInitials(user) : '?';
+  const fullName = user ? getFullName(user) : 'Unknown';
+  const role = user ? formatRole(user.rolename) : '';
+
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
@@ -51,9 +57,7 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
           transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           background: SIDEBAR_BG,
           border: 'none',
-          overflowX: 'hidden',
-          scrollbarWidth: 'none', // Hide scrollbar for Firefox
-          '&::-webkit-scrollbar': { display: 'none' }, // Hide scrollbar for Chrome/Safari
+          overflow: 'hidden',
         },
       }}
     >
@@ -165,36 +169,20 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
         })}
       </List>
 
-      {/* Side Cards */}
-      {open && (
-        <Box sx={{ px: 2, mb: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: alpha('#fff', 0.05), border: `1px solid ${alpha('#fff', 0.08)}` }}>
-            <Typography sx={{ fontSize: '0.7rem', color: alpha('#fff', 0.5), textTransform: 'uppercase', letterSpacing: 0.5, mb: 0.5, fontWeight: 600 }}>Assistant</Typography>
-            <Typography sx={{ fontSize: '0.85rem', color: '#fff', fontWeight: 500, mb: 0.5 }}>Lumo for Exhibitors</Typography>
-            <Typography sx={{ fontSize: '0.75rem', color: alpha('#fff', 0.4), lineHeight: 1.4 }}>Use case: event info, deadlines, form filling, order forms, letters, stand rules, logistics, FAQ</Typography>
-          </Box>
-          <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: alpha('#fff', 0.05), border: `1px solid ${alpha('#fff', 0.08)}` }}>
-            <Typography sx={{ fontSize: '0.7rem', color: alpha('#fff', 0.5), textTransform: 'uppercase', letterSpacing: 0.5, mb: 0.5, fontWeight: 600 }}>Monitoring Window</Typography>
-            <Typography sx={{ fontSize: '0.85rem', color: '#fff', fontWeight: 500, mb: 0.5 }}>Last 30 Days</Typography>
-            <Typography sx={{ fontSize: '0.75rem', color: alpha('#fff', 0.4), lineHeight: 1.4 }}>Sample dashboard with organizer-level insights</Typography>
-          </Box>
-        </Box>
-      )}
-
       {/* User Account */}
       <Box sx={{ px: 2, pb: 2 }}>
         <Divider sx={{ borderColor: alpha('#fff', 0.08), mb: 2 }} />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Avatar sx={{ width: 36, height: 36, bgcolor: '#6366f1', fontSize: '0.85rem', fontWeight: 700, flexShrink: 0 }}>
-            RK
+            {initials}
           </Avatar>
           {open && (
             <Box sx={{ overflow: 'hidden' }}>
               <Typography sx={{ color: '#fff', fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                Rajesh Kumar
+                {fullName}
               </Typography>
               <Typography sx={{ color: alpha('#fff', 0.4), fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
-                Super Admin
+                {role}
               </Typography>
             </Box>
           )}

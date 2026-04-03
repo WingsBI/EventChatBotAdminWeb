@@ -12,6 +12,7 @@ import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { useThemeContext } from '../../theme/ThemeContext';
+import { getAuthUser, getInitials, getFullName, formatRole } from '../../utils/auth';
 
 const breadcrumbMap: Record<string, string> = {
   '/': 'Dashboard',
@@ -44,6 +45,12 @@ export default function AppBar() {
     Cookies.remove('user');
     navigate('/login');
   };
+
+  const user = getAuthUser();
+  const initials = user ? getInitials(user) : '?';
+  const fullName = user ? getFullName(user) : 'Unknown';
+  const email = user?.email ?? '';
+  const role = user ? formatRole(user.rolename) : '';
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const currentPage = breadcrumbMap[location.pathname] || pathSegments[pathSegments.length - 1] || 'Dashboard';
@@ -136,7 +143,7 @@ export default function AppBar() {
             '&:hover': { boxShadow: (t) => `0 0 0 3px ${alpha(t.palette.primary.main, 0.25)}` },
           }}
         >
-          RK
+          {initials}
         </Avatar>
 
         {/* Profile Menu */}
@@ -151,8 +158,11 @@ export default function AppBar() {
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         >
           <Box sx={{ px: 2, py: 1.5 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, lineHeight: 1.3 }}>Administrator</Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: 12 }}>admin@xpopilot.com</Typography>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, lineHeight: 1.3 }}>{fullName}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: 12 }}>{email}</Typography>
+            {role && (
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: 11, mt: 0.25 }}>{role}</Typography>
+            )}
           </Box>
           <Divider />
           <MenuItem onClick={handleProfileClose} sx={{ gap: 1.5, py: 1.2 }}>
