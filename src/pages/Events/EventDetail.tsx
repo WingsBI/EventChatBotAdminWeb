@@ -95,7 +95,7 @@ export default function EventDetail() {
   // Formik for chatbot configuration (Configuration tab)
   const configForm = useFormik({
     initialValues: {
-      bot_name: 'XpoAssist',
+      bot_name: 'Xpo-Pilot',
       welcome_message: '',
       primary_color: '#6366f1',
       chatboticon: 'SmartToy',
@@ -147,7 +147,7 @@ export default function EventDetail() {
     if (chatbotConfig || chatbotTheme) {
       configForm.resetForm({
         values: {
-          bot_name: chatbotConfig?.bot_name || 'XpoAssist',
+          bot_name: chatbotConfig?.bot_name || 'Xpo-Pilot',
           welcome_message: chatbotConfig?.welcome_message || '',
           primary_color: chatbotTheme?.background || '#6366f1',
           chatboticon: chatbotConfig?.chatboticon || 'SmartToy',
